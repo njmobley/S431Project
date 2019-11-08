@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 library(RColorBrewer)
+library(gridExtra)
 ```
 
 Reading in the data
@@ -66,57 +67,74 @@ ggplot(data = kki, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour
 ```
 
 ```{r}
-ggplot(data = kki, aes(x = mABC_AGE, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+Move.Age <- ggplot(data = kki, aes(x = mABC_AGE, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 #low correlation between age and motor skills in all 
 # groups
 ```
 
 ```{r}
-ggplot(data = kki, aes(x = mABC_AGE, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+SRS.Age <- ggplot(data = kki, aes(x = SRS_AGE, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 #again no real relationship
 ```
 
-
-
 ```{r}
-ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+grid.arrange(Move.Age,SRS.Age, nrow = 1)
+#I don't know a good way of putting the gird together
+# and the legend so somebody might wanna try that
 ```
+
 ```{r}
-ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+SRS.Manual <- ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')
+```
+
+```{r}
+SRS.AimAndCatch <- ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')
 ```
 
 ```{r}
 #Really interesting! 
 #The better the ADHD kids were at balance the better their social deficit was! Let's investigate the relationship between age and balance
-ggplot(data = kki, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+SRS.Balance <- ggplot(data = kki, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 ```
 
 ```{r}
-ggplot(data = kki, aes(y = mABC_Balance.Component.StandardScore, x = mABC_AGE, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+grid.arrange(SRS.Manual,SRS.AimAndCatch,SRS.Balance, nrow = 2)
+```
+
+
+
+
+
+```{r}
+Balance.Age <- ggplot(data = kki, aes(y = mABC_Balance.Component.StandardScore, x = mABC_AGE, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 ```
 
 ```{r}
-ggplot(data = kki, aes(x = mABC_AGE, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+grid.arrange(Balance.Age,SRS.Age, nrow = 1)
 ```
+
 
 ### So far the only meaningfull conclusion I have is that when a child with ADHD has really good balance they have less social deficit. Doesn't seem to have a correlation to the other two movement tests. We might want to consider having a focus on the balance test.
 
 Below will be subdividing all the tests into the three seperate tests conducted
+
+
 ```{r}
-names(kki)
+SRS.Bal1 <- ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.1.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 ```
 
 ```{r}
-ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.1.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth()
+SRS.Bal2 <- ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.2.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 ```
 
 ```{r}
-ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.2.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth()
+SRS.Bal3 <- ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.3.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 ```
 
 ```{r}
-ggplot(data = kki, aes(y = SRS_TotalRawScore, x = mABC_Balance.3.StandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .8) + geom_jitter() + geom_smooth()
+grid.arrange(SRS.Bal1,SRS.Bal2,SRS.Bal3,nrow = 2)
 ```
+
 
 This looks to tell me that some balance tests were easier than others with 3 being the easiest, 2 being the hardest, and 1 being more well rounded
 

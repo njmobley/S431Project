@@ -1,0 +1,8 @@
+---
+title: "Thomas Data Exploration"
+author: "Arthur Janes"
+date: "11/10/2019"
+output: html_document
+---
+
+#Just starting!

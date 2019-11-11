@@ -1,0 +1,117 @@
+---
+title: "S431 Project EDA- Alli"
+author: "Allison McCarty"
+date: "11/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+####My goal is to determine the relationship between social deficits and motor skill for children with multiple diagnoses. To do this, I want to see if having multiple diagnoses correlates to a change in a change in motor skills (compared to only having one diagnosis)
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+library(gridExtra)
+library(ggthemes)
+```
+
+Reading in the data
+```{r, message=FALSE}
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+```
+
+```{r, message=FALSE, warning=FALSE}
+#Fix odd ID col
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.social)[1] <- "ID"
+colnames(kki.movement)[1] <- "ID"
+kki <- merge(kki.demo,kki.social)
+kki <- merge(kki,kki.movement)
+#Now have all the data in a huge data frame
+#Removing N/A values. Mostly removing second visits.
+kki <- na.omit(kki)
+kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
+multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
+singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
+nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+
+```
+
+
+For this graph, we filtered out typically developing children to look at the how having additional diagnoses affects the relationship between motor skills and social development. 
+
+```{r}
+ggplot(data = kki2, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = SecondaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE)
+```
+
+If the child has one diagnosis, having an additional secondary diagnosis is associated with slightly higher social deficits (for most mABC scores) and a different pattern for the relationship between motor skills and social deficits
+
+###Compare Average SRS Score for both of the Groups
+
+####I think that one possible way to group this data would be to divide it into typically developing children, children with only Autism, Children with ADHD, and Children with both
+
+####Single Diagnosis (either Autism or ADHD)
+```{r}
+p1 <- ggplot(data = singdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE) +geom_smooth(data=singdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+theme(legend.position="bottom")
+p1
+```
+
+####Multiple Diagnoses
+```{r}
+p2 <- ggplot(data = multdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth()+geom_smooth(data=multdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+theme(legend.position="bottom")
+p2
+```
+
+####Typical Development
+```{r}
+p3 <- ggplot(data = nodia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="bottom")
+p3
+```
+
+##Compare the Three Groups
+```{r}
+grid.arrange(p1, p2, p3, nrow=2)
+```
+
+####Single Diagnosis (either Autism or ADHD) mABC Components
+```{r}
+singdex<- ggplot(data = singdia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE) +xlab("Dexterity Subscore") +geom_smooth(data=singdia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+theme(legend.position = "bottom")
+
+singaimcat <- ggplot(data = singdia, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis, width=7)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE)+ xlab("Aiming and Catching Subscore") +geom_smooth(data=singdia, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+ theme(legend.position="none")
+
+singbal <- ggplot(data = singdia, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis, width=7)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE)+ xlab("Balance Subscore") +geom_smooth(data=singdia, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+ theme(legend.position="none")
+
+grid.arrange(singbal,singaimcat,singdex, nrow = 2)
+```
+
+
+####Multiple Diagnosis mABC Components
+
+```{r}
+multdex <-ggplot(data = multdia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="bottom")+xlab("Dexterity Subscore")+geom_smooth(data=multdia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)
+  
+multaimcat <-ggplot(data = multdia, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="none")+ xlab("Aiming and Catching Subscore")+geom_smooth(data=multdia, aes(x =  mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)
+  
+  
+multbal <- ggplot(data = multdia, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="none") + xlab("Balance Subscore")+geom_smooth(data=multdia, aes(x =  mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)
+  
+
+grid.arrange(multbal,multaimcat,multdex, nrow = 2)
+```
+
+####Typical Development mABC Components
+
+```{r}
+typdex<-ggplot(data = nodia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="none")+xlab("Dexterity Subscore")
+
+typaimcat<-ggplot(data = nodia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="none")+xlab("Dexterity Subscore")
+
+typbal<-ggplot(data = nodia, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth()+theme(legend.position="none")+xlab("Dexterity Subscore")
+
+grid.arrange(typdex, typaimcat, typbal, nrow=2)
+```

@@ -115,8 +115,18 @@ ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Balance.Component.
 ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
 ```
 
+```{r}
 
+ggplot(data = na.omit(kki.need),aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore , colour = PrimaryDiagnosis)) + geom_point() + facet_wrap(~RightHanded) + geom_smooth()
+```
 
+```{r}
+kki.right <- subset(kki.need,kki.need$RightHanded == TRUE)
+nrow(kki.right)
+kki.left <- subset(kki.need,kki.need$RightHanded == FALSE)
+nrow(kki.left)
+nrow(kki.left)/nrow(kki.right)
+```
 
 
 

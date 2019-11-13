@@ -70,6 +70,12 @@ singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
 nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
 ```
 
+WISC Score by Primary Diagnosis
+```{r}
+ggplot(data = kki.wisc4, aes(x = PrimaryDiagnosis, y = score)) + geom_boxplot()
+```
+Interestingly enough, children with no primary diagnosis have the lowest median WISC score of the three groups.
+
 WISC Score vs. SRS Score
 ```{r message=FALSE, warning=FALSE}
 ggplot(data = kki.wisc4, aes(x = score, y = SRS_TotalRawScore)) + geom_point() + ggtitle("WISC Version 4: SRS Score vs. WISC Score") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
@@ -93,8 +99,7 @@ ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore)) + geom_poi
 
 ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth()
 ```
-
-As WISC Score increases, mABC score decreases and SRS score increases.
+As WISC Score increases, mABC score decreases slightly, probably negligible.
 
 Wisc Score vs. Balance
 ```{r message=FALSE, warning=FALSE}
@@ -106,6 +111,42 @@ ggplot(data = kki.wisc5, aes(x = score, y = mABC_Balance.Component.StandardScore
 
 ggplot(data = kki.wisc5, aes(x = score, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Balance vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth()
 ```
+No real relationship here.
 
+```{r message=FALSE, warning=FALSE}
+ggplot(data = kki.wisc4, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC Dexterity vs. WISC Score") + labs(x = "WISC Score", y = "mABC Dexterit") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
+ggplot(data = kki.wisc4, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC Dexterity vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth()
 
+ggplot(data = kki.wisc5, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC Dexterity vs. WISC Score") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+
+ggplot(data = kki.wisc5, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Dexterity vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth()
+```
+No relationship here.
+
+```{r message=FALSE, warning=FALSE}
+ggplot(data = kki.wisc4, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC AimingAndCatching vs. WISC Score") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+
+ggplot(data = kki.wisc4, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC AimingAndCatching vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth()
+
+ggplot(data = kki.wisc5, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC AimingAndCatching vs. WISC Score") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+
+ggplot(data = kki.wisc5, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC AimingAndCatching vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth()
+```
+No real relationship here.
+
+```{r}
+Move.Age <- ggplot(data = kki.wisc4, aes(x = mABC_AGE, y = score, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
+#low correlation between age and motor skills in all 
+# groups
+```
+
+```{r}
+SRS.Age <- ggplot(data = kki.wisc4, aes(x = SRS_AGE, y = score, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
+#again no real relationship
+```
+
+```{r message=FALSE, warning=FALSE}
+grid.arrange(Move.Age,SRS.Age, nrow = 1)
+```
+No real relationship between age and WISC score. As age increases, children with Autism do worse on the WISC.

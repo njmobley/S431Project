@@ -249,7 +249,16 @@ grid.arrange(Move.Age,SRS.Age, nrow = 1)
 
 
 
-##Summary of EDA and Research Proposal
+##Summary of Preliminary and Research Proposal
 
 -
+
+##Citations
+
+1. Green,  D.,  Charman,  T.,  Pickles,  A.,  Chandler,  S.,  Loucas,  T.,Simonoff,  E.,  et  al.  (2009).  Impairment  in  movement  skills  ofchildren  with  autistic  spectrum  disorders. Developmental  Medicine and Child Neurology, 51(4), 311–316.
+
+2. Ament, K., Mejia, A., E., et al. (2014). Evidence for specificity of motor impairments in catching and balance in children with autism. Journal of autism and developmental disorders, 45(3), pp.742-751.
+
+
+
 

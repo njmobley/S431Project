@@ -15,9 +15,9 @@ library(gridExtra)
 Reading in the WISC data
 ```{r, message=FALSE}
 wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
-wisc <- na.omit(wisc)
-wisc4 <- filter(kki.wisc, WISC_VERSION == 4)
-wisc5 <- filter(kki.wisc, WISC_VERSION == 5)
+#wisc <- na.omit(wisc)
+wisc4 <- filter(wisc, WISC_VERSION == 4)
+wisc5 <- filter(wisc, WISC_VERSION == 5)
 wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
 wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
 

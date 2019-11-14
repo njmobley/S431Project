@@ -102,7 +102,7 @@ ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,
 
 - For children with ASD, there is a slight increase in SRS score at low motor assessment scores, but the relationship is relatively constant at intermediate values of motor assessment
 
-- There is a negative association between motor skills and SRS score in children with ADHD, meaning children with better motor skills tend to have less social deficits .
+- There is a negative association between motor skills and SRS score in children with ADHD, meaning children with better motor skills tend to have less social deficits.
 
 - Motor skills have little effect on social skills for typically-developing children.
 
@@ -201,6 +201,10 @@ intel4 <-ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore, co
 ```{r}
 grid.arrange(intel1, intel2, intel3, intel4, nrow=2)
 ```
+
+- There is no substantial correlation between intelligence and social deficits in children across all subgroups.
+
+- There is a slight negative relationship between intelligence and motor skills in children across all subgroups, but the correlation is small and likely negligible. 
 
 ## Does having multiple diagnoses influence Social Deficits or Motor Skills?
 

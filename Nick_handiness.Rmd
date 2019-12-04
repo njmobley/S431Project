@@ -269,5 +269,10 @@ kki.leftTD <- subset(kki.left,kki.left$PrimaryDiagnosis == 'None')
 
 ```
 
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+
 
 

@@ -24,14 +24,17 @@ library(knitr)
 setwd("C:/Users/nmobl/Desktop/School/Fall2019/Stat-S431/S431Project")
 
 kki.demo <- read.csv("Data\\KKI_demographicInfo.csv")
+kki.hand <-  read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_handedness.csv")
 kki.social <- read.csv("Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
 kki.movement <- read.csv("Data\\KKI_movementAssessmentBatteryforChildren.csv")
 #Fix odd ID col
+colnames(kki.hand)[1] <- "ID"
 colnames(kki.demo)[1] <- "ID"
 colnames(kki.social)[1] <- "ID"
 colnames(kki.movement)[1] <- "ID"
 kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
+kki <- merge(kki,kki.hand)
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
 kki <- na.omit(kki)
@@ -43,8 +46,54 @@ nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
 ```
 
 ```{r}
-
+kki.adhd <- subset(kki,kki$PrimaryDiagnosis == "ADHD")
+kki.adhd1 <- subset(kki.adhd,kki.adhd$SRS_VERSION == 1)
+kki.adhd2 <- subset(kki.adhd,kki.adhd$SRS_VERSION == 2)
 ```
+
+
+```{r}
+lm.basic <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore,data = kki.adhd)
+``` 
+
+```{r}
+summary(lm.basic)
+```
+
+
+
+
+
+
+```{r}
+lm.better <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer ,data = kki.adhd)
+summary(lm.better)
+```
+
+```{r}
+x = seq(0,15,.01)
+y = -1.5356 * x + 59.4489
+ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = SRS_TotalRawScore)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = -1.5356 * mABC_Balance.Component.StandardScore + 59.4489)) 
+```
+
+
+```{r}
+lm.better1 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer, data = kki.adhd1)
+summary(lm.better1)
+```
+
+```{r}
+lm.better2 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer, data = kki.adhd2)
+summary(lm.better2)
+```
+
+
+
+
+
+
+
 
 
 

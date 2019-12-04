@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "Nick_handeness"
 author: "Nicholas Mobley"
@@ -129,6 +130,144 @@ nrow(kki.left)/nrow(kki.right)
 ```
 
 
+
+
+
+=======
+---
+title: "Nick_handeness"
+author: "Nicholas Mobley"
+date: "11/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+library(gridExtra)
+```
+
+```{r}
+kki.hand <-  read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_handedness.csv")
+kki.demo <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_demographicInfo.csv")
+kki.move <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_movementAssessmentBatteryforChildren.csv")
+kki.srs <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
+```
+
+
+```{r}
+colnames(kki.hand)[1] <- "ID"
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.move)[1] <- "ID"
+colnames(kki.srs)[1] <- "ID"
+
+kki.sub1 <- merge(kki.hand,kki.demo)
+kki.sub2 <- merge(kki.move,kki.srs)
+kki <- merge(kki.sub1,kki.sub2)
+View(kki)
+kki.need <- cbind(kki[1],kki[3],kki[12],kki[5],kki[16],kki[19],kki[23],kki[27])
+```
+
+```{r}
+names(kki.need)
+```
+
+
+```{r}
+#Devloping a color pallete for the different groups.
+OurColors <- brewer.pal(3,"Dark2")
+names(OurColors) <- levels(kki$PrimaryDiagnosis)
+colScale <- scale_color_manual(name = 'PrimaryDiagnosis',values = OurColors)
+```
+
+
+```{r}
+## -1 fully left  1 fully right
+ggplot(data = kki.need, aes(x = EdinburghHandedness_Integer, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+```
+
+```{r}
+ggplot(data = kki.need, aes(x = EdinburghHandedness_Integer, y = mABC_AimingAndCatching.Component.StandardScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+```
+
+```{r}
+ggplot(data = kki.need, aes(x = EdinburghHandedness_Integer, y = mABC_Balance.Component.StandardScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+```
+
+
+```{r}
+left <- subset(kki.need,kki$EdinburghHandedness_Integer < 0)
+left <- subset(left,left$PrimaryDiagnosis == "Autism")
+right <- subset(kki.need,kki$EdinburghHandedness_Integer > 0)
+right <- subset(right,right$PrimaryDiagnosis == "Autism")
+mean(left$mABC_TotalStandardScore)
+mean(right$mABC_TotalStandardScore)
+```
+
+```{r}
+ggplot(data = kki.need, aes(x = EdinburghHandedness_Integer, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
+```
+
+
+```{r}
+kki$RightHanded <- kki$EdinburghHandedness_Integer > 0
+kki.need$RightHanded <- kki$EdinburghHandedness_Integer >= 0
+```
+
+
+
+
+```{r}
+
+#ggplot(data = dat, aes(y = SRS_TotalRawScore, x = Gender)) + geom_boxplot(fill = c("pink","blue",'pink','blue','pink','blue')) + facet_wrap(~ PrimaryDiagnosis)
+
+
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Aiming, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+names(kki.need)
+```
+
+
+
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+
+ggplot(data = na.omit(kki.need),aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore , colour = PrimaryDiagnosis)) + geom_point() + facet_wrap(~RightHanded) + geom_smooth()
+```
+
+```{r}
+kki.right <- subset(kki.need,kki.need$RightHanded == TRUE)
+kki.rightASD <- subset(kki.right,kki.need$PrimaryDiagnosis == "Autism")
+kki.rightADHD <- subset(kki.right,kki.need$PrimaryDiagnosis == "ADHD")
+kki.rightTD <- subset(kki.right,kki.need$PrimaryDiagnosis == "None")
+
+kki.left <- subset(kki.need,kki.need$RightHanded == FALSE)
+kki.leftASD <- subset(kki.left,kki.left$PrimaryDiagnosis == "Autism")
+kki.leftADHD <- subset(kki.left,kki.left$PrimaryDiagnosis == 'ADHD')
+kki.leftTD <- subset(kki.left,kki.left$PrimaryDiagnosis == 'None')
+
+```
 
 
 

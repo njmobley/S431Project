@@ -1,0 +1,298 @@
+---
+title: "Project Proposal & Preliminary Findings: "
+subtitle: "KKI Study on Motor Skills and Social Deficits in Children"
+author: "Allison McCarty,  Nick Janes, Thomas Mobely"
+date: "11/13/2019"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+```
+
+```{r, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+library(gridExtra)
+library(ggthemes)
+library(reportr)
+
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+#Fix odd ID col
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.social)[1] <- "ID"
+colnames(kki.movement)[1] <- "ID"
+kki <- merge(kki.demo,kki.social)
+kki <- merge(kki,kki.movement)
+#Now have all the data in a huge data frame
+#Removing N/A values. Mostly removing second visits.
+kki <- na.omit(kki)
+kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
+multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
+singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
+nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+```
+## Introduction: Study Details & Relevant Background Information
+
+- Autism (ASD) and Attention Deficit/Hyperactivity Disorder (ADHD) are frequently observed in children, but are still not fully understood. 
+
+- Researchers at Kennedy Krieger Institute(KKI)  ran a study on children with ASD, ADHD, and typically developing children to study differences in social deficits, motor impairment, intelligence.
+    - It is known that children with developmental disorders suffer from motor impairment concurrent with social deficits       associated with their respective diagnoses(1,2).  The extent and cause of this correlation merits further research.
+
+- Metrics and Scales Used to Quantify Symptom Severity in Children:
+    1. Social Responsiveness Scale Questionnaire (SRS): measures severity of social deficits in children (higher scores indicate more social deficits)
+    2. Movement Assessment Battery for Children (mABC): measures motor impairments in children.  Three subcategories for assessment include dexterity, aiming and catching, and balance summed to obtain the mABC Total Standard Score
+    3. Wechsler Intelligence Scale for Children (WISC): measures intelligence in children.  Two versions of the test quantify vocabulary, information, picture concepts, etc.
+
+## Introduction: Areas of Particular Interest
+###Data and Analysis
+
+- We want to investigate the overall association between social deficits and motor skills for each diagnosis group.
+
+
+    <large>> Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.</large>
+  
+    <large>> Secondary Endpoint: What factors influence this association?</large>
+    
+- Data Collected for Investigation and Analysis:
+    - Age
+    - Handedness (quantified by Edinburgh Handedness Integer)
+    - Gender
+    - Primary and Secondary Diagnosis
+    - SRS Total and Subscores
+    - mABC Total and Subscores
+    - WISC Score
+    
+
+##Relationship Between SRS Total Score and Motor Assessment Score
+```{r}
+ggplot(data = kki, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Association Between Social Deficits and Motor Ability")+ theme(legend.position = 'bottom')
+
+```
+
+- Children with ASD tend to have the most social deficits and the lowest "high" score for motor assessment, followed by children with ADHD and TD children.
+
+
+- For children with ASD, there is a slight increase in SRS score at low motor assessment scores, but the relationship is relatively constant at intermediate values of motor assessment
+
+- There is a negative association between motor skills and SRS score in children with ADHD, meaning children with better motor skills tend to have less social deficits .
+
+- Motor skills have little effect on social skills for typically-developing children.
+
+##Relationship Between SRS Total Score and Motor Assessment Sub-Scores
+
+```{r, include=FALSE}
+SRS.Manual <- ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Manual Dexterity Score")+ggtitle("Association between Manual Dexterity and Socail Deficits")
+```
+
+```{r, include=FALSE}
+SRS.AimAndCatch <- ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Aiming and Catching Score")+ggtitle("Association between Aiming and Catching and Socail Deficits")
+```
+
+```{r, include=FALSE}
+#Really interesting! 
+#The better the ADHD kids were at balance the better their social deficit was! Let's investigate the relationship between age and balance
+SRS.Balance <- ggplot(data = kki, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'bottom')+ylab("SRS Total Score")+xlab("Balance Score")+ggtitle("Association Between Balance and Social Deficits")
+```
+
+```{r}
+grid.arrange(SRS.Manual,SRS.AimAndCatch,SRS.Balance, nrow = 2)
+```
+
+- The balance component of the motor assessment drives the negative correlation between social deficits and motor skills. 
+
+- For the ADS group, social deficits decreased as dexterity increased.  Conversely, social deficits tended to increase as aiming and catching ability increased.
+
+
+##Does Intelligence(measured by WISC) influence Social Deficits or Motor Skills?
+```{r, include=FALSE}
+wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
+#wisc <- na.omit(wisc)
+wisc4 <- filter(wisc, WISC_VERSION == 4)
+wisc5 <- filter(wisc, WISC_VERSION == 5)
+wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
+wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+wisc4$score <- rowSums(wisc4[,5:10])
+wisc4$WISC5_Vocabulary <- NULL
+wisc4$WISC5_Similarities <- NULL
+wisc4$WISC5_BlockDesign <- NULL
+wisc4$WISC5_MatrixReasoning <- NULL
+wisc4$WISC5_FigureWeights <- NULL
+wisc4 <- na.omit(wisc4)
+wisc5$score <- rowSums(wisc5[,11:15])
+wisc5$WISC4_Vocabulary <- NULL
+wisc5$WISC4_Similarities <- NULL
+wisc5$WISC4_BlockDesign <- NULL
+wisc5$WISC4_MatrixReasoning <- NULL
+wisc5$WISC4_FigureWeights <- NULL
+wisc5$WISC4_Information <- NULL
+wisc5$WISC4_PictureConcepts <- NULL
+wisc5 <- na.omit(wisc5)
+```
+
+
+```{r, include=FALSE}
+#Fix odd ID col
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.social)[1] <- "ID"
+colnames(kki.movement)[1] <- "ID"
+kki <- merge(kki.demo,kki.social)
+kki <- merge(kki,kki.movement)
+#Now have all the data in a huge data frame
+#Removing N/A values. Mostly removing second visits.
+kki <- na.omit(kki)
+#Combine kki with WISC version 4 data
+kki.wisc4 <- full_join(kki, wisc4, by = 'ID')
+kki.wisc4 <- filter(kki.wisc4, WISC_VERSION == 4)
+#Combine kki with WISC version 5 data
+kki.wisc5 <- full_join(kki, wisc5, by = 'ID')
+kki.wisc5 <- filter(kki.wisc5, WISC_VERSION == 5)
+kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
+multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
+singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
+nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+```
+
+```{r, include=FALSE}
+intel1 <-ggplot(data = kki.wisc4, aes(x = score, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC V.4: Motor Skills vs. Intelligence") + labs(x = "WISC Score", y = "SRS Total Score") + geom_smooth()+theme(legend.position = 'none')
+
+intel2 <- ggplot(data = kki.wisc5, aes(x = score, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC V.5: Motor Skills vs. Intelligence") + labs(x = "WISC Score", y = "SRS Total Score") + geom_smooth()+theme(legend.position = 'none')
+
+intel3 <-ggplot(data = kki.wisc4, aes(x = score, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC V.4: Motor Skills vs. Intelligence") + labs(x = "WISC Score", y = "mABC Total Score") + geom_smooth()+theme(legend.position = 'none')
+
+intel4 <-ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC V.5: Motor Skills vs. Intelligence") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth()+theme(legend.position = 'bottom')
+```
+
+```{r}
+grid.arrange(intel1, intel2, intel3, intel4, nrow=2)
+```
+
+## Does having multiple diagnoses influence Social Deficits or Motor Skills?
+
+```{r, include=FALSE}
+p1 <- ggplot(data = singdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore, color=PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(se=FALSE) +geom_smooth(data=singdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore), size=1.25, color="green", se=FALSE)+theme(legend.position="bottom") +
+  ggtitle("Single Diagnosis Group 
+(either ASD or ADHD)") +ylab("SRS Total Score")+xlab("Motor Assessment Score")
+p1
+```
+
+
+```{r, include=FALSE}
+p2 <- ggplot(data = multdia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore, color=SecondaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(color="green")+theme(legend.position="none")+
+  ggtitle("Multiple Diagnosis Group
+(both ADHD and Autism)")+ylab("SRS Total Score")+xlab("Motor Assessment Score")
+p2
+```
+
+
+```{r, include=FALSE}
+p3 <- ggplot(data = nodia, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth(color="green")+theme(legend.position="bottom")+ggtitle("Typical Development Group")+ylab("SRS Total Score")+xlab("Motor Assessment Score")+theme(legend.position="none")
+p3
+```
+
+
+```{r}
+grid.arrange(p3, p2, p1, nrow=2)
+```
+
+- For children with only a single diagnosis social deficits tended to increase as motor skills increased.
+
+- For children with a secondary diagnosis, social deficits tended to increase as motor skills increased, and did so more drastically (especially at high values of motor ability) than in the single diagnosis group.
+
+- For TD children, social deficits were high for very low and very high motor assessment scores.  Children with the least social deficits tended to have intermediate motor skills.
+
+
+##Does Handedness influence Social Deficits or Motor Skills?
+
+```{r, include=FALSE}
+kki.hand <-  read.csv("KKI_handedness.csv")
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.move <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+kki.srs <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+colnames(kki.hand)[1] <- "ID"
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.move)[1] <- "ID"
+colnames(kki.srs)[1] <- "ID"
+kki.sub1 <- merge(kki.hand,kki.demo)
+kki.sub2 <- merge(kki.move,kki.srs)
+kki <- merge(kki.sub1,kki.sub2)
+
+kki.need <- cbind(kki[1],kki[3],kki[12],kki[5],kki[16],kki[19],kki[23],kki[27])
+
+left <- subset(kki.need,kki$EdinburghHandedness_Integer < 0)
+left <- subset(left,left$PrimaryDiagnosis == "Autism")
+right <- subset(kki.need,kki$EdinburghHandedness_Integer > 0)
+right <- subset(right,right$PrimaryDiagnosis == "Autism")
+
+kki$RightHanded <- kki$EdinburghHandedness_Integer > 0
+kki.need$RightHanded <- kki$EdinburghHandedness_Integer >= 0
+
+
+hand1 <-ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)+theme(legend.position="none")+ylab("Aiming and Catching Score")
+
+hand2 <- ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)+theme(legend.position="none")+ylab("Balance Score")
+
+hand3 <- ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)+theme(legend.position="bottom")+ylab("Manual Dexterity Score")
+
+```
+
+
+```{r}
+grid.arrange(hand1, hand2, hand3, nrow=2)
+```
+
+##Does Age influence Social Deficits or Motor Skills?
+
+
+```{r, include=FALSE}
+Move.Age <- ggplot(data = kki, aes(x = mABC_AGE, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'bottom')+xlab("Age(years)")+ylab("mABC Total Score")
+#low correlation between age and motor skills in all 
+# groups
+```
+
+```{r, include=FALSE}
+SRS.Age <- ggplot(data = kki, aes(x = SRS_AGE, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'bottom')+xlab("Age(years)")+ylab("SRS Total Score")
+#again no real relationship
+#NEXT CHUNK:I don't know a good way of putting the gird together
+# and the legend so somebody might wanna try that
+```
+
+```{r}
+grid.arrange(Move.Age,SRS.Age, nrow = 1)
+
+```
+
+- Age did not seem to have a substantial effect on SRS assessment for any of the diagnosis groups. 
+
+- For all groups, motor ability tended to increase until about age 10 or 12, and then plateau. 
+
+
+##Summary of Preliminary and Research Proposal
+
+- The overall relationship will be most effectively studied by stratifying for each diagnosis group, and investigating the motor assessment subcomponenets, rather than the total overall score.
+
+- Intelligence
+
+- The number of diagnoses that a child has (0, 1, or 2) affect the relationship between motor ability and social deficits.
+
+- Handedness
+
+- Age influences motor abilities, but it does not influence SRS score.
+
+- Research Proposal: We want to invesitate how social deficits and specific motor skills (mABC sub-components) differ in children with ASD, ADHD and TD groups  We want to understand the relationship between social deficits and motor skills, and how factors such as intelligence, age, handedness, and having a second diagnosis affect this relationsip for each of the groups.
+
+##Citations
+
+1. Green,  D.,  Charman,  T.,  Pickles,  A.,  Chandler,  S.,  Loucas,  T.,Simonoff,  E.,  et  al.  (2009).  Impairment  in  movement  skills  ofchildren  with  autistic  spectrum  disorders. Developmental  Medicine and Child Neurology, 51(4), 311–316.
+
+2. Ament, K., Mejia, A., E., et al. (2014). Evidence for specificity of motor impairments in catching and balance in children with autism. Journal of autism and developmental disorders, 45(3), pp.742-751.
+
+
+
+

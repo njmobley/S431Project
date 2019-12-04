@@ -12,36 +12,53 @@ library(RColorBrewer)
 library(gridExtra)
 ```
 
-Reading in the WISC data
+Handling the WISC data
 ```{r, message=FALSE}
-wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
-#wisc <- na.omit(wisc)
-wisc4 <- filter(wisc, WISC_VERSION == 4)
-wisc5 <- filter(wisc, WISC_VERSION == 5)
-wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
-wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
-
 kki.demo <- read.csv("KKI_demographicInfo.csv")
 kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
 kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
 
-wisc4$score <- rowSums(wisc4[,5:10])
-wisc4$WISC5_Vocabulary <- NULL
-wisc4$WISC5_Similarities <- NULL
-wisc4$WISC5_BlockDesign <- NULL
-wisc4$WISC5_MatrixReasoning <- NULL
-wisc4$WISC5_FigureWeights <- NULL
-wisc4 <- na.omit(wisc4)
+wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
+wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
+wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
 
-wisc5$score <- rowSums(wisc5[,11:15])
-wisc5$WISC4_Vocabulary <- NULL
-wisc5$WISC4_Similarities <- NULL
-wisc5$WISC4_BlockDesign <- NULL
-wisc5$WISC4_MatrixReasoning <- NULL
-wisc5$WISC4_FigureWeights <- NULL
-wisc5$WISC4_Information <- NULL
-wisc5$WISC4_PictureConcepts <- NULL
-wisc5 <- na.omit(wisc5)
+wisc4 <- filter(wisc, WISC_VERSION == 4)
+wisc5 <- filter(wisc, WISC_VERSION == 5)
+
+wisc4 <- wisc4[-c(11:15)]
+wisc5 <- wisc5[-c(5:10)]
+
+wisc4 <- filter(wisc4, visit == 1)
+wisc5 <- filter(wisc5, visit == 1)
+
+#Calculate composite scores for both WISC versions
+wisc4$score <- rowSums(wisc4[,5:10])
+wisc5$score <- rowSums(wisc5[,5:9])
+
+#Filter out NA scores
+wisc4 <- na.omit(wisc4, cols = "score")
+wisc5 <- na.omit(wisc5, cols = "score")
+
+#Convert composite scores to GAI scores for WISC version 4
+composite4 = rep(0,length(wisc4[,1]))
+for (i in 1:length(wisc4[,1])) {
+  composite4[i] <- wisc4GAI[wisc4[i,11]-5,2]
+}
+wisc4$GAI <- composite4
+
+#Convert composite scores to GAI scores for WISC version 5
+composite5 = rep(0,length(wisc5[,1]))
+for (i in 1:length(wisc5[,1])) {
+  composite5[i] <- wisc5GAI[wisc5[i,10]-4,2]
+}
+wisc5$GAI <- composite5
+
+#Remove composite scores
+wisc4 <- wisc4[-c(2:11)]
+wisc5 <- wisc5[-c(2:10)]
+
+#Combine WISC data
+wisc.combo <- full_join(wisc4, wisc5, by = c('ID', 'GAI'))
 ```
 
 Reading in the KKI data
@@ -53,100 +70,152 @@ colnames(kki.movement)[1] <- "ID"
 kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 #Now have all the data in a huge data frame
+
 #Removing N/A values. Mostly removing second visits.
 kki <- na.omit(kki)
 
 #Combine kki with WISC version 4 data
-kki.wisc4 <- full_join(kki, wisc4, by = 'ID')
-kki.wisc4 <- filter(kki.wisc4, WISC_VERSION == 4)
+kki.wisc <- full_join(kki, wisc.combo, by = 'ID')
 
-#Combine kki with WISC version 5 data
-kki.wisc5 <- full_join(kki, wisc5, by = 'ID')
-kki.wisc5 <- filter(kki.wisc5, WISC_VERSION == 5)
+#Make new data frames multiple diagnoses, single diagnosis, no diagnosis
+kki2 <- filter(kki.wisc, PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
+multdia <- filter(kki.wisc, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
+singdia <- filter(kki.wisc, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
+nodia <- filter(kki.wisc, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+```
 
-kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
-multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
-singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
-nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+Hand Data
+```{r}
+kki.hand <-  read.csv("KKI_handedness.csv")
+colnames(kki.hand)[1] <- "ID"
+kki.wisc <- full_join(kki.wisc, kki.hand, by = 'ID')
 ```
 
 WISC Score by Primary Diagnosis
 ```{r}
-ggplot(data = kki.wisc4, aes(x = PrimaryDiagnosis, y = score)) + geom_boxplot()
+ggplot(data = kki.wisc, aes(x = PrimaryDiagnosis, y = GAI)) + geom_boxplot()
 ```
-Interestingly enough, children with no primary diagnosis have the lowest median WISC score of the three groups.
 
 WISC Score vs. SRS Score
 ```{r message=FALSE, warning=FALSE}
-ggplot(data = kki.wisc4, aes(x = score, y = SRS_TotalRawScore)) + geom_point() + ggtitle("WISC Version 4: SRS Score vs. WISC Score") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+ggplot(data = kki.wisc, aes(x = GAI, y = SRS_TotalRawScore)) + geom_point() + ggtitle("SRS Score vs. WISC Score") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
-ggplot(data = kki.wisc4, aes(x = score, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: SRS Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth()
-
-ggplot(data = kki.wisc5, aes(x = score, y = SRS_TotalRawScore)) + geom_point() + ggtitle("WISC Version 5: SRS Score vs. WISC Score") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
-
-ggplot(data = kki.wisc5, aes(x = score, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: SRS Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth()
-
-#ggplot(data = kki.wisc4, aes(x = WISC_VERSION, y = score)) + geom_boxplot() + geom_boxplot(data = kki.wisc5, aes(x = WISC_VERSION, y = score))
+ggplot(data = kki.wisc, aes(x = GAI, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("SRS Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "SRS Score") + geom_smooth()
 ```
 
 WISC Score vs. mABC Score
 ```{r message=FALSE, warning=FALSE}
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_TotalStandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC Score vs. WISC Score") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_TotalStandardScore)) + geom_point() + ggtitle("mABC Score vs. WISC Score") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth()
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC Score vs. WISC Score") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth()
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_TotalStandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("mABC Score vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Score") + geom_smooth()
 ```
-As WISC Score increases, mABC score decreases slightly, probably negligible.
 
 Wisc Score vs. Balance
 ```{r message=FALSE, warning=FALSE}
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_Balance.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC Balance vs. WISC Score") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_Balance.Component.StandardScore)) + geom_point() + ggtitle("mABC Balance vs. WISC Score") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC Balance vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth()
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_Balance.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC Balance vs. WISC Score") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Balance vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth()
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("mABC Balance vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Balance") + geom_smooth()
 ```
-No real relationship here.
 
 ```{r message=FALSE, warning=FALSE}
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC Dexterity vs. WISC Score") + labs(x = "WISC Score", y = "mABC Dexterit") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_ManualDexterity.Component.StandardScore)) + geom_point() + ggtitle("mABC Dexterity vs. WISC Score") + labs(x = "WISC Score", y = "mABC Dexterit") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC Dexterity vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth()
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC Dexterity vs. WISC Score") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC Dexterity vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth()
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("mABC Dexterity vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC Dexterity") + geom_smooth()
 ```
-No relationship here.
 
 ```{r message=FALSE, warning=FALSE}
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 4: mABC AimingAndCatching vs. WISC Score") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_AimingAndCatching.Component.StandardScore)) + geom_point() + ggtitle("mABC AimingAndCatching vs. WISC Score") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
 
-ggplot(data = kki.wisc4, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 4: mABC AimingAndCatching vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth()
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore)) + geom_point() + ggtitle("WISC Version 5: mABC AimingAndCatching vs. WISC Score") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth() + geom_smooth(method = 'lm', colour = 'red')
-
-ggplot(data = kki.wisc5, aes(x = score, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("WISC Version 5: mABC AimingAndCatching vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth()
+ggplot(data = kki.wisc, aes(x = GAI, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_point() + ggtitle("mABC AimingAndCatching vs. WISC Score Colored by Primary Diagnosis") + labs(x = "WISC Score", y = "mABC AimingAndCatching") + geom_smooth()
 ```
-No real relationship here.
 
 ```{r}
-Move.Age <- ggplot(data = kki.wisc4, aes(x = mABC_AGE, y = score, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
+Move.Age <- ggplot(data = kki.wisc, aes(x = mABC_AGE, y = GAI, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 #low correlation between age and motor skills in all 
 # groups
 ```
 
 ```{r}
-SRS.Age <- ggplot(data = kki.wisc4, aes(x = SRS_AGE, y = score, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
+SRS.Age <- ggplot(data = kki.wisc, aes(x = SRS_AGE, y = GAI, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')
 #again no real relationship
 ```
 
 ```{r message=FALSE, warning=FALSE}
 grid.arrange(Move.Age,SRS.Age, nrow = 1)
 ```
-No real relationship between age and WISC score. As age increases, children with Autism do worse on the WISC.
+
+```{r}
+#SRS ~ mABC, .2658
+lm1 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = kki.wisc)
+#summary(lm1)
+
+#SRS ~ mABC + WISC, .268
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = kki.wisc)
+#summary(lm2)
+
+#SRS ~ mABC + WISC, .2717
+lm3 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE, data = kki.wisc)
+#summary(lm3)
+
+#Multiple Diagnoses: SRS ~ mABC, .05596
+lm1 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = multdia)
+#summary(lm1)
+
+#Multiple Diagnoses: SRS ~ mABC + WISC, .06019
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = multdia)
+#summary(lm2)
+
+#Single Diagnosis: SRS ~ mABC, .1625
+lm1 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = singdia)
+#summary(lm1)
+
+#Single Diagnosis: SRS ~ mABC + WISC, .1499
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = singdia)
+#summary(lm2)
+
+#No Diagnosis: SRS ~ mABC, -.001383
+lm1 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = nodia)
+#summary(lm1)
+
+#No Diagnosis: SRS ~ mABC + WISC, 0.009215
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = nodia)
+#summary(lm2)
+
+#kki2: SRS ~ mABC, 0.1143
+lm1 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = kki2)
+#summary(lm1)
+
+#kki2: SRS ~ mABC + WISC, .09214
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = kki2)
+#summary(lm2)
+```
+
+```{r}
+#Autism
+aut <- filter(kki.wisc, PrimaryDiagnosis == "Autism")
+
+#No Secondary Diagnosis
+no <- filter(aut, SecondaryDiagnosis =="No")
+#One Secondary Diagnosis
+yes <- filter(aut, SecondaryDiagnosis =="Yes")
+
+lm <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = aut)
+#Adjusted R^2: -.00652
+lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = aut)
+#Adjusted R^2: -.00746
+lm3 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender, data = aut)
+#Adjusted R^2: -.01883
+
+lmNo <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender + SRS_VERSION, data = no)
+#Adjusted R^2: .01758
+summary(lmNo)
+lmYes <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender, data = yes)
+#Adjusted R^2: -.00241
+
+lmNo <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + GAI + SRS_AGE + Gender, data = no)
+#Adjusted R^2: -0.03923
+lmYes <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + GAI + SRS_AGE + Gender, data = yes)
+#Adjusted R^2: 0.007135
+
+
+```

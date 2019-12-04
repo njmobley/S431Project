@@ -1,0 +1,52 @@
+---
+title: "LinearModel_Nick"
+author: "Nicholas Mobley"
+date: "12/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+library(gridExtra)
+library(ggthemes)
+library(reportr)
+library(knitr)
+```
+
+
+```{r}
+setwd("C:/Users/nmobl/Desktop/School/Fall2019/Stat-S431/S431Project")
+
+kki.demo <- read.csv("Data\\KKI_demographicInfo.csv")
+kki.social <- read.csv("Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("Data\\KKI_movementAssessmentBatteryforChildren.csv")
+#Fix odd ID col
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.social)[1] <- "ID"
+colnames(kki.movement)[1] <- "ID"
+kki <- merge(kki.demo,kki.social)
+kki <- merge(kki,kki.movement)
+#Now have all the data in a huge data frame
+#Removing N/A values. Mostly removing second visits.
+kki <- na.omit(kki)
+kki <- subset(kki,kki$mABC_AGE<14)
+kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
+multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
+singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
+nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+```
+
+```{r}
+
+```
+
+
+
+
+

@@ -17,10 +17,10 @@ library(gridExtra)
 ```
 
 ```{r}
-kki.hand <-  read.csv("C:\\Users\\nmobl\\OneDrive\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_handedness.csv")
-kki.demo <- read.csv("C:\\Users\\nmobl\\OneDrive\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_demographicInfo.csv")
-kki.move <- read.csv("C:\\Users\\nmobl\\OneDrive\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_movementAssessmentBatteryforChildren.csv")
-kki.srs <- read.csv("C:\\Users\\nmobl\\OneDrive\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.hand <-  read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_handedness.csv")
+kki.demo <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_demographicInfo.csv")
+kki.move <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_movementAssessmentBatteryforChildren.csv")
+kki.srs <- read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
 ```
 
 
@@ -33,8 +33,8 @@ colnames(kki.srs)[1] <- "ID"
 kki.sub1 <- merge(kki.hand,kki.demo)
 kki.sub2 <- merge(kki.move,kki.srs)
 kki <- merge(kki.sub1,kki.sub2)
-kki
-kki.need <- cbind(kki[1],kki[3],kki[12],kki[5],kki[19],kki[23],kki[27])
+View(kki)
+kki.need <- cbind(kki[1],kki[3],kki[12],kki[5],kki[16],kki[19],kki[23],kki[27])
 ```
 
 ```{r}
@@ -77,6 +77,56 @@ mean(right$mABC_TotalStandardScore)
 ggplot(data = kki.need, aes(x = EdinburghHandedness_Integer, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()
 ```
 
+
+```{r}
+kki$RightHanded <- kki$EdinburghHandedness_Integer > 0
+kki.need$RightHanded <- kki$EdinburghHandedness_Integer >= 0
+```
+
+
+
+
+```{r}
+
+#ggplot(data = dat, aes(y = SRS_TotalRawScore, x = Gender)) + geom_boxplot(fill = c("pink","blue",'pink','blue','pink','blue')) + facet_wrap(~ PrimaryDiagnosis)
+
+
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Aiming, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+names(kki.need)
+```
+
+
+
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_AimingAndCatching.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_Balance.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+
+
+```{r}
+ggplot(data = na.omit(kki.need),aes(x = RightHanded, y = mABC_ManualDexterity.Component.StandardScore, colour = PrimaryDiagnosis)) + geom_boxplot() + facet_wrap(~PrimaryDiagnosis)
+```
+
+```{r}
+
+ggplot(data = na.omit(kki.need),aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore , colour = PrimaryDiagnosis)) + geom_point() + facet_wrap(~RightHanded) + geom_smooth()
+```
+
+```{r}
+kki.right <- subset(kki.need,kki.need$RightHanded == TRUE)
+nrow(kki.right)
+kki.left <- subset(kki.need,kki.need$RightHanded == FALSE)
+nrow(kki.left)
+nrow(kki.left)/nrow(kki.right)
+```
 
 
 

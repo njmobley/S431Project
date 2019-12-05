@@ -2,7 +2,7 @@
 title: "Model_Presentation"
 author: "Nicholas Mobley"
 date: "12/4/2019"
-output: slidy_presentation
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -71,9 +71,11 @@ kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 kki <- merge(kki,wisc.combo)
 kki <- merge(kki,kki.hand)
+## 555
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
-kki <- na.omit(kki)
+kki <- subset(kki,!is.na(kki$SRS_TotalRawScore))
+kki <- subset(kki, !is.na(kki$mABC_AGE))
 kki <- subset(kki,kki$mABC_AGE<14)
 kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
 multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
@@ -86,11 +88,38 @@ kki.adhd2 <- subset(kki.adhd, kki.adhd$SRS_VERSION == 2)
 ```
 
 
-## Introduction
-  
-  <large>> Primary Goal: What are the effects of different motor skills for each Primary Diagnosis.</large>
+## Introduction: Study Details & Relevant Background Information
 
-## Exploring Motor Skills
+- Autism (ASD) and Attention Deficit/Hyperactivity Disorder (ADHD) are frequently observed in children, but are still not fully understood. 
+
+- Researchers at Kennedy Krieger Institute(KKI)  ran a study on children with ASD, ADHD, and typically developing children to study differences in social deficits, motor impairment, intelligence.
+    - It is known that children with developmental disorders suffer from motor impairment concurrent with social deficits       associated with their respective diagnoses(1,2).  The extent and cause of this correlation merits further research.
+
+- Metrics and Scales Used to Quantify Symptom Severity in Children:
+    1. Social Responsiveness Scale Questionnaire (SRS): measures severity of social deficits in children (higher scores indicate more social deficits)
+    2. Movement Assessment Battery for Children (mABC): measures motor impairments in children.  Three subcategories for assessment include dexterity, aiming and catching, and balance summed to obtain the mABC Total Standard Score
+    3. Wechsler Intelligence Scale for Children (WISC): measures intelligence in children.  Two versions of the test quantify vocabulary, information, picture concepts, etc.
+
+## Introduction: Areas of Particular Interest
+### Data and Analysis
+
+- We want to investigate the overall association between social deficits and motor skills for each diagnosis group.
+
+
+    <large>> Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.</large>
+  
+    <large>> Secondary Endpoint: What factors influence this association?</large>
+    
+- Data Collected for Investigation and Analysis:
+    - Age
+    - Handedness (quantified by Edinburgh Handedness Integer)
+    - Gender
+    - Primary and Secondary Diagnosis
+    - SRS Total
+    - mABC Total and Subscores
+    - WISC Score
+
+## Methods: Cleaning Data
 ```{r,include = FALSE,echo = FALSE}
 kki.asd <- subset(kki,kki$PrimaryDiagnosis == 'Autism')
 kki.adhd <- subset(kki,kki$PrimaryDiagnosis == 'ADHD')
@@ -109,12 +138,33 @@ femaleCount <- c(nrow(kki.asd.female),nrow(kki.adhd.female),nrow(kki.td.female))
 rightCount <- c(124,285,307)
 leftCount <- c(20,36,42)
 table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,rightCount,leftCount)
-table <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","RightHanded","LeftHanded"))
+FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","RightHanded","LeftHanded"))
 ```
+
+- Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
+- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 569 Observations
+- Converted all the WISC scores to the GAI scale for comparability
+
+
+
+
+
+```{r}
+FinalTable
+```
+
+
+
+
+
+
+
+## Methods: Exploring Motor Skills
+
 
 ```{r,echo = FALSE}
 graph.dat <- subset(kki,kki$mABC_TotalStandardScore <12)
-ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Association Between Social Deficits and Motor Ability")+ theme(legend.position = 'bottom')
+total <- ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Association Between Social Deficits and Motor Ability")+ theme(legend.position = 'bottom')
 ```
 
 ```{r,echo = FALSE,include=FALSE}
@@ -133,23 +183,64 @@ SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardS
 ```
 
 ```{r,echo = FALSE}
-SRS.Manual
-SRS.AimAndCatch
-SRS.Balance
+  total
+  SRS.Manual
+  SRS.AimAndCatch
+  SRS.Balance
 ```
 
+## Methods: Other Variables
 
+```{r}
+ggplot(data = kki, aes(x = GAI, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("Association between GAI Score and Social Deficits")
+ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("Association between GAI Score and Motor Skills")
+```
 
+- Seems to be negative correlation between Intelligence and Motor Skills, but no correlation between Intelligence and Social Deficit 
 
+```{r}
+kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 
+ggplot(data = na.omit(kki),aes(group = Hand,y = mABC_TotalStandardScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)
+ggplot(data = na.omit(kki),aes(group = Hand,y = SRS_TotalRawScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)
+```
 
+## Proposed Models
 
+$$
+\text{Social Deficit Score}_i = \textbf{X} * \boldsymbol{\beta} \\
+where: \\
+\boldsymbol{\beta} = \begin{bmatrix}
+            \text{Intercept} \\
+            \text{Balance Score} \\
+            \text{Aiming And Catching Score} \\
+            \text{EdinburgHandedness_Integer} \\
+            \text{GAI} \\
+            \text{Gender} \\
+            \text{mABC_AGE} 
+            \end{bmatrix}
+$$
 
+```{r}
+kki.1 <- subset(kki,kki$SRS_VERSION == 1)
+kki.2 <- subset(kki,kki$SRS_VERSION == 2)
+```
 
+```{r,include=FALSE}
+t.test(kki.1$SRS_TotalRawScore,kki.2$SRS_TotalRawScore)
+```
 
+- seperate SRS Versions from Welch t-test
 
-## Methods
+$$
+H_0: \text{Mean of SRS Total Scores from Version 1 = Mean of SRS Total Scores from Version 2} \\
+H_1: \text{Mean of SRS Total Scores from Version 1} \space \neq \text{Mean of SRS Total Scores from Version 2} \\
+\text{Under the null we got a t-statistc of -6.03 from a t-distribution of 417.38 Degrees of Freedom} \\
+\text{that has a p-value of} \space 3.511 \times 10^{-9} \\ \space \text{Under} \space \alpha = .05 \space \text{we reject the null}
+\text{ and believe that there is a true difference in the mean}
+$$
 
+## Results
 
 
 ```{r,echo=FALSE,include=FALSE}
@@ -176,12 +267,6 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd1), y = residuals(lm.adhd1))) + geom_po
 
 
 
-
-
-## Results
-
-
-## Conclusions
 
 
 

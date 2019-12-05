@@ -22,7 +22,6 @@ library(knitr)
 
 ```{r}
 setwd("C:/Users/nmobl/Desktop/School/Fall2019/Stat-S431/S431Project")
-
 kki.demo <- read.csv("Data\\KKI_demographicInfo.csv")
 kki.hand <-  read.csv("C:\\Users\\nmobl\\Desktop\\School\\Fall2019\\STAT-S431\\S431Project\\Data\\KKI_handedness.csv")
 kki.social <- read.csv("Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
@@ -84,13 +83,26 @@ summary(lm.better1)
 ```
 
 ```{r}
-lm.better2 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer, data = kki.adhd2)
+lm.better2 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore, data = kki.adhd2)
 summary(lm.better2)
 ```
 
+```{r}
+ggplot(kki.adhd2,aes(x= mABC_TotalStandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth(colour = 'red') + geom_smooth(method = 'lm')
+```
 
 
+```{r}
+ggplot(kki.adhd1,aes(x= mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth(method = 'lm') +geom_smooth(colour = 'red')
+```
 
+```{r}
+ggplot(data = kki.adhd,aes(x = mABC_AGE,y = SRS_TotalRawScore)) + geom_point() + geom_smooth(method = 'lm')
+```
+
+```{r}
+ggplot(data = kki.adhd, aes(x = mABC_AGE,y = mABC_TotalStandardScore)) + geom_point() + geom_smooth()
+```
 
 
 

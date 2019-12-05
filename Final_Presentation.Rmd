@@ -1,5 +1,5 @@
 ---
-title: "Model_Presentation"
+title: "Models to Determine Relationship of Motor Skills on Social Deficit"
 author: "Nicholas Mobley"
 date: "12/4/2019"
 output: html_document
@@ -75,7 +75,7 @@ kki <- merge(kki,kki.hand)
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
 kki <- subset(kki,!is.na(kki$SRS_TotalRawScore))
-kki <- subset(kki, !is.na(kki$mABC_AGE))
+kki <- subset(kki, !is.na(kki$mABC_TotalStandardScore))
 kki <- subset(kki,kki$mABC_AGE<14)
 kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
 multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
@@ -120,6 +120,7 @@ kki.adhd2 <- subset(kki.adhd, kki.adhd$SRS_VERSION == 2)
     - WISC Score
 
 ## Methods: Cleaning Data
+
 ```{r,include = FALSE,echo = FALSE}
 kki.asd <- subset(kki,kki$PrimaryDiagnosis == 'Autism')
 kki.adhd <- subset(kki,kki$PrimaryDiagnosis == 'ADHD')
@@ -142,20 +143,13 @@ FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Fe
 ```
 
 - Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
-- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 569 Observations
+- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 568 Observations
 - Converted all the WISC scores to the GAI scale for comparability
-
-
-
 
 
 ```{r}
 FinalTable
 ```
-
-
-
-
 
 
 
@@ -193,7 +187,7 @@ SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardS
 
 ```{r}
 ggplot(data = kki, aes(x = GAI, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("Association between GAI Score and Social Deficits")
-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("Association between GAI Score and Motor Skills")
+ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("Association between GAI Score and Motor Skills")
 ```
 
 - Seems to be negative correlation between Intelligence and Motor Skills, but no correlation between Intelligence and Social Deficit 
@@ -208,7 +202,7 @@ ggplot(data = na.omit(kki),aes(group = Hand,y = SRS_TotalRawScore, colour = Hand
 ## Proposed Models
 
 $$
-\text{Social Deficit Score}_i = \textbf{X} * \boldsymbol{\beta} \\
+\text{E[Social Deficit Score]} = \textbf{X} * \boldsymbol{\beta} \\
 where: \\
 \boldsymbol{\beta} = \begin{bmatrix}
             \text{Intercept} \\
@@ -216,7 +210,7 @@ where: \\
             \text{Aiming And Catching Score} \\
             \text{EdinburgHandedness_Integer} \\
             \text{GAI} \\
-            \text{Gender} \\
+            \text{Gender Male} \\
             \text{mABC_AGE} 
             \end{bmatrix}
 $$
@@ -240,29 +234,187 @@ H_1: \text{Mean of SRS Total Scores from Version 1} \space \neq \text{Mean of SR
 \text{ and believe that there is a true difference in the mean}
 $$
 
-## Results
+## Resutls: Typically Developing
 
+```{r}
+
+nodia1 <- subset(nodia,nodia$SRS_VERSION == 1)
+nodia2 <- subset(nodia,nodia$SRS_VERSION == 2)
+lm.nodia1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia1)
+lm.nodia2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia2)
+summary(lm.nodia2)
+```
+
+
+
+
+## Results: ADHD
+
+- For SRS Version 1
 
 ```{r,echo=FALSE,include=FALSE}
 lm.adhd1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd1)
-summary(lm.adhd1)
+lm.basic1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = kki.adhd1)
 ```
+
+$$
+\boldsymbol{\beta} = \begin{bmatrix}
+            \text{Intercept} \\
+            \text{Balance Score} \\
+            \text{Aiming And Catching Score} \\
+            \text{EdinburgHandedness_Integer} \\
+            \text{GAI} \\
+            \text{ADHD Subtype Inattentive} \\
+            \text{Gender Male} \\
+            \text{mABC_AGE} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+64.0176 \\
+-2.3512 \\
+1.3089  \\
+8.3848  \\
+0.0620   \\
+-13.9720 \\
+-9.3211 \\
+ -1.1236 
+\end{bmatrix}
+$$
+
+```{r,include = FALSE,echo = FALSE}
+ggplot(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
+```
+
+```{r}
+males <- which(kki.adhd1$Gender == "M")
+
+ggplot(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
+```
+
+```{r}
+females <- which(kki.adhd1$Gender == "F")
+
+ggplot(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
+```
+
+
+```{r}
+ggplot(data = NULL,aes(x = fitted(lm.adhd1), y = residuals(lm.adhd1))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
+  ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
+```
+
+
+
+```{r,include= FALSE}
+standardize <- function(model) {
+  s = (1/85) * sum(residuals(model)^2)
+  residuals(model)/ (s * (sqrt(1-influence(model)$hat)))
+}
+student.lmadhd1 <- standardize(lm.adhd1)
+leverage.lmadhd1 <- influence(lm.adhd1)$hat
+```
+
+```{r,include=FALSE}
+ggplot(data = NULL,aes(x = leverage.lmadhd1, y = student.lmadhd1)) + geom_point() + geom_hline(y = 0)
+```
+
+
+```{r}
+anova(lm.basic1,lm.adhd1)
+```
+
+$$
+H_0: \text{Just Balance and Catching is Sufficient} \\
+H_1: \text{Full Model is Sufficient} \\
+\text{Under the null we got an F-statistic of 4.2735 where} \ F \sim F_{5,85} \\
+\text{which gives us a p-value of .0016 with an} \ \alpha = .05 \ \text{we reject the null} \\
+\text{and believe that we should keep every coefficient in the full model}
+$$
+
+- For SRS Version 2
 
 ```{r,echo=FALSE,include=FALSE}
-lm.adhd2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + bs(mABC_AGE,knots = 10), data = kki.adhd2)
-summary(lm.adhd2)
+lm.adhd2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd2)
+lm.basic2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = kki.adhd2)
+```
+
+$$
+\boldsymbol{\beta} = \begin{bmatrix}
+            \text{Intercept} \\
+            \text{Balance Score} \\
+            \text{Aiming And Catching Score} \\
+            \text{EdinburgHandedness_Integer} \\
+            \text{GAI} \\
+            \text{ADHD Subtype Inattentive} \\
+            \text{Gender Male} \\
+            \text{mABC_AGE} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+54.637 \\
+0.2525 \\
+-0.9143  \\
+0.4960  \\
+0.0037   \\
+-8.7537 \\
+1.6450 \\
+0.5879 
+\end{bmatrix}
+$$
+
+```{r}
+ggplot(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore,y = fitted(lm.adhd2), colour = factor(ADHD_Subtype))) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore, mABC_AimingAndCatching.Component.StandardScore *-.9143 + 54.637),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore, mABC_AimingAndCatching.Component.StandardScore *-.9143 + 45.883),colour = 'blue',size = 1.5) + ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") 
 ```
 
 ```{r}
-ggplot(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1))) + geom_point() + geom_jitter() +
-  geom_line(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 63.42687),colour = 'blue',size = 1.5)
+ggplot(data = NULL,aes(x = fitted(lm.adhd2), y = residuals(lm.adhd2))) + geom_point() + geom_hline( yintercept = 0) +
+  ggtitle("Residual Plot for ADHD Model(2)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
+
+
+
+```{r,include= FALSE}
+
+student.lmadhd2 <- standardize(lm.adhd2)
+leverage.lmadhd2 <- influence(lm.adhd2)$hat
+```
+
+```{r,include=FALSE}
+ggplot(data = NULL,aes(x = leverage.lmadhd2, y = student.lmadhd2)) + geom_point() + geom_hline(y = 0)
+```
+
 
 ```{r}
-ggplot(data = NULL,aes(x = fitted(lm.adhd1), y = residuals(lm.adhd1))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth()
+anova(lm.basic2,lm.adhd2)
 ```
 
+$$
+H_0: \text{Just Balance and Catching is Sufficient} \\
+H_1: \text{Full Model is Sufficient} \\
+\text{Under the null we got an F-statistic of 4.2735 where} \ F \sim F_{5,72} \\
+\text{which gives us a p-value of .0016 with an} \ \alpha = .05 \ \text{we reject the null} \\
+\text{and believe that we should keep every coefficient in the full model}
+$$
 
+
+
+## Results: ASD
+
+```{r}
+
+kki.aut <- subset(kki,kki$PrimaryDiagnosis == "Autism")
+
+```
+
+## Conclusions
 
 
 

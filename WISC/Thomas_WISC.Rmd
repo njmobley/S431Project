@@ -88,6 +88,8 @@ Hand Data
 ```{r}
 kki.hand <-  read.csv("KKI_handedness.csv")
 colnames(kki.hand)[1] <- "ID"
+kki.hand <- filter(kki.hand, visit == 1)
+kki.hand <- kki.hand[-c(2)]
 kki.wisc <- full_join(kki.wisc, kki.hand, by = 'ID')
 ```
 
@@ -199,6 +201,11 @@ no <- filter(aut, SecondaryDiagnosis =="No")
 #One Secondary Diagnosis
 yes <- filter(aut, SecondaryDiagnosis =="Yes")
 
+#Version 1
+uno <- filter(aut, SRS_VERSION == 1)
+#Version 2
+dos <- filter(aut, SRS_VERSION == 2)
+
 lm <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore, data = aut)
 #Adjusted R^2: -.00652
 lm2 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI, data = aut)
@@ -208,7 +215,6 @@ lm3 <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender, 
 
 lmNo <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender + SRS_VERSION, data = no)
 #Adjusted R^2: .01758
-summary(lmNo)
 lmYes <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore + GAI + SRS_AGE + Gender, data = yes)
 #Adjusted R^2: -.00241
 
@@ -217,5 +223,5 @@ lmNo <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + GAI + SRS_
 lmYes <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + GAI + SRS_AGE + Gender, data = yes)
 #Adjusted R^2: 0.007135
 
-
 ```
+

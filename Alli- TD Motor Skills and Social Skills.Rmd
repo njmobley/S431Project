@@ -1,0 +1,53 @@
+---
+title: "Alli Presentation for TD Children"
+author: "Allison McCarty"
+date: "12/3/2019"
+output: html_document
+---
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+library(gridExtra)
+library(ggthemes)
+```
+
+Reading in the data
+```{r, message=FALSE}
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+```
+
+```{r, message=FALSE, warning=FALSE}
+#Fix odd ID col
+colnames(kki.demo)[1] <- "ID"
+colnames(kki.social)[1] <- "ID"
+colnames(kki.movement)[1] <- "ID"
+kki <- merge(kki.demo,kki.social)
+kki <- merge(kki,kki.movement)
+#Now have all the data in a huge data frame
+#Removing N/A values. Mostly removing second visits.
+kki <- na.omit(kki)
+kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"), visit ==1)
+
+nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No", visit==1)
+nodia1 <- subset(nodia, SRS_VERSION==1)
+nodia2 <- subset(nodia, SRS_VERSION==2)
+```
+
+
+```{r}
+ggplot(data = nodia1, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = mABC_AGE)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth(method="lm")
+lm1 <-lm(SRS_TotalRawScore ~mABC_TotalStandardScore+mABC_TotalStandardScore, data=nodia1)
+summary(lm1)
+```
+
+
+```{r}
+ggplot(data = nodia2, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = mABC_AGE)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth(method="lm")
+lm2 <-lm(SRS_TotalRawScore ~mABC_TotalStandardScore+mABC_TotalStandardScore, data=nodia2)
+summary(lm2)
+```
+
+

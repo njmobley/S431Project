@@ -6,10 +6,10 @@ output: slidy_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
-```{r,include=FALSE}
+```{r,echo = FALSE,include=FALSE}
 library(ggplot2)
 library(dplyr)
 library(RColorBrewer)
@@ -17,15 +17,60 @@ library(gridExtra)
 library(ggthemes)
 library(reportr)
 library(knitr)
-kki.demo <- read.csv("S431Project\\Data\\KKI_demographicInfo.csv")
-kki.social <- read.csv("S431Project\\Data\\KKI_SocialResponsivenessScaleQuestionnaire.csv")
-kki.movement <- read.csv("S431Project\\Data\\KKI_movementAssessmentBatteryforChildren.csv")
-#Fix odd ID col
+library(splines)
+```
+
+```{r, echo=FALSE,include=FALSE}
+kki.demo <- read.csv("Data/KKI_demographicInfo.csv")
+kki.social <- read.csv("Data/KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("Data/KKI_movementAssessmentBatteryforChildren.csv")
+kki.hand <- read.csv("Data\\KKI_handedness.csv")
+wisc <- read.csv("Data/KKI_WechslerIntelligenceScaleforChildren.csv")
+wisc4GAI <- read.csv("Data/wisc4GAI_lookup.csv")
+wisc5GAI <- read.csv("Data/wisc5GAI_lookup.csv")
 colnames(kki.demo)[1] <- "ID"
 colnames(kki.social)[1] <- "ID"
 colnames(kki.movement)[1] <- "ID"
+colnames(kki.hand)[1] <- "ID"
+colnames(wisc)[1] <- "ID"
+colnames(wisc4GAI)[1] <- "ID"
+colnames(wisc5GAI)[1] <- "ID"
+wisc4 <- filter(wisc, WISC_VERSION == 4)
+wisc5 <- filter(wisc, WISC_VERSION == 5)
+wisc4 <- wisc4[-c(11:15)]
+wisc5 <- wisc5[-c(5:10)]
+wisc4 <- filter(wisc4, visit == 1)
+wisc5 <- filter(wisc5, visit == 1)
+#Calculate composite scores for both WISC versions
+wisc4$score <- rowSums(wisc4[,5:10])
+wisc5$score <- rowSums(wisc5[,5:9])
+#Filter out NA scores
+wisc4 <- na.omit(wisc4, cols = "score")
+wisc5 <- na.omit(wisc5, cols = "score")
+#Convert composite scores to GAI scores for WISC version 4
+composite4 = rep(0,length(wisc4[,1]))
+for (i in 1:length(wisc4[,1])) {
+  composite4[i] <- wisc4GAI[wisc4[i,11]-5,2]
+}
+wisc4$GAI <- composite4
+#Convert composite scores to GAI scores for WISC version 5
+composite5 = rep(0,length(wisc5[,1]))
+for (i in 1:length(wisc5[,1])) {
+  composite5[i] <- wisc5GAI[wisc5[i,10]-4,2]
+}
+wisc5$GAI <- composite5
+#Remove composite scores
+wisc4 <- wisc4[-c(2:11)]
+wisc5 <- wisc5[-c(2:10)]
+#Combine WISC data
+wisc.combo <- full_join(wisc4, wisc5, by = c('ID', 'GAI'))
+```
+
+```{r,echo=FALSE,include=FALSE}
 kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
+kki <- merge(kki,wisc.combo)
+kki <- merge(kki,kki.hand)
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
 kki <- na.omit(kki)
@@ -34,30 +79,97 @@ kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"
 multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
 singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
 nodia <- filter(kki, PrimaryDiagnosis =="None" , SecondaryDiagnosis =="No")
+kki.adhd <- subset(kki,PrimaryDiagnosis == "ADHD")
+kki.adhd <- subset(kki.adhd,ADHD_Subtype != "Hyperactive/Impulsive")
+kki.adhd1 <- subset(kki.adhd,kki.adhd$SRS_VERSION == 1)
+kki.adhd2 <- subset(kki.adhd, kki.adhd$SRS_VERSION == 2)
 ```
-
 
 
 ## Introduction
+  
+  <large>> Primary Goal: What are the effects of different motor skills for each Primary Diagnosis.</large>
 
-```{r}
-ggplot(data = NULL,aes( x = 1:100, y = rnorm(1) * 1:100)) + geom_point()
+## Exploring Motor Skills
+```{r,include = FALSE,echo = FALSE}
+kki.asd <- subset(kki,kki$PrimaryDiagnosis == 'Autism')
+kki.adhd <- subset(kki,kki$PrimaryDiagnosis == 'ADHD')
+kki.td <- subset(kki,kki$PrimaryDiagnosis == 'None')
+diagnosis <- c("ASD","ADHD","TD")
+counts <- c(nrow(kki.asd),nrow(kki.adhd),nrow(kki.td))
+age <- c(mean(kki.asd$mABC_AGE),mean(kki.adhd$mABC_AGE),mean(kki.td$mABC_AGE))
+kki.asd.male <- subset(kki.asd,kki.asd$Gender == 'M')
+kki.asd.female <- subset(kki.asd,kki.asd$Gender == 'F')
+kki.adhd.male <- subset(kki.adhd,kki.adhd$Gender == 'M')
+kki.adhd.female <- subset(kki.adhd,kki.adhd$Gender == 'F')
+kki.td.male <- subset(kki.td, kki.td$Gender == 'M')
+kki.td.female <- subset(kki.td,kki.td$Gender == 'F')
+maleCount <- c(nrow(kki.asd.male),nrow(kki.adhd.male),nrow(kki.td.male))
+femaleCount <- c(nrow(kki.asd.female),nrow(kki.adhd.female),nrow(kki.td.female))
+rightCount <- c(124,285,307)
+leftCount <- c(20,36,42)
+table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,rightCount,leftCount)
+table <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","RightHanded","LeftHanded"))
 ```
+
+```{r,echo = FALSE}
+graph.dat <- subset(kki,kki$mABC_TotalStandardScore <12)
+ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Association Between Social Deficits and Motor Ability")+ theme(legend.position = 'bottom')
+```
+
+```{r,echo = FALSE,include=FALSE}
+SRS.Manual <- ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Manual Dexterity Score")+ggtitle("Association between Manual Dexterity and Social Deficits")
+```
+
+```{r,echo = FALSE,include=FALSE}
+SRS.AimAndCatch <- ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Aiming and Catching Score")+ggtitle("Association between Aiming and Catching and Social Deficits")
+```
+
+```{r,echo = FALSE,include=FALSE}
+#Really interesting! 
+#The better the ADHD kids were at balance the better their social deficit was! Let's investigate the relationship between age and balance
+graph.dat <- subset(kki, kki$mABC_Balance.Component.StandardScore < 15)
+SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Balance Score")+ggtitle("Association Between Balance and Social Deficits")
+```
+
+```{r,echo = FALSE}
+SRS.Manual
+SRS.AimAndCatch
+SRS.Balance
+```
+
+
+
+
+
+
+
+
+
 
 
 ## Methods
 
 
 
+```{r,echo=FALSE,include=FALSE}
+lm.adhd1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd1)
+summary(lm.adhd1)
+```
 
+```{r,echo=FALSE,include=FALSE}
+lm.adhd2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + bs(mABC_AGE,knots = 10), data = kki.adhd2)
+summary(lm.adhd2)
+```
 
+```{r}
+ggplot(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1))) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd1,aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 63.42687),colour = 'blue',size = 1.5)
+```
 
-
-
-
-
-
-
+```{r}
+ggplot(data = NULL,aes(x = fitted(lm.adhd1), y = residuals(lm.adhd1))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth()
+```
 
 
 

@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 ```{r}
@@ -17,6 +17,7 @@ library(gridExtra)
 library(ggthemes)
 library(reportr)
 library(knitr)
+library(splines)
 ```
 
 
@@ -50,6 +51,9 @@ kki.adhd1 <- subset(kki.adhd,kki.adhd$SRS_VERSION == 1)
 kki.adhd2 <- subset(kki.adhd,kki.adhd$SRS_VERSION == 2)
 ```
 
+```{r}
+ggplot(data = kki.adhd,aes(group = SRS_VERSION, y = SRS_TotalRawScore,colour = SRS_VERSION)) + facet_wrap(~ADHD_Subtype) + geom_boxplot()
+```
 
 ```{r}
 lm.basic <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore,data = kki.adhd)
@@ -59,53 +63,31 @@ lm.basic <- lm(SRS_TotalRawScore ~ mABC_TotalStandardScore,data = kki.adhd)
 summary(lm.basic)
 ```
 
-
-
-
-
-
 ```{r}
-lm.better <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer ,data = kki.adhd)
-summary(lm.better)
+fit <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + bs(mABC_AGE,knots = 10), data = kki.adhd1)
+summary(fit)
 ```
 
 ```{r}
-x = seq(0,15,.01)
-y = -1.5356 * x + 59.4489
-ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = SRS_TotalRawScore)) + geom_point() + geom_jitter() +
-  geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = -1.5356 * mABC_Balance.Component.StandardScore + 59.4489)) 
+fit <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd1)
+summary(fit)
 ```
 
 
-```{r}
-lm.better1 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer, data = kki.adhd1)
-summary(lm.better1)
-```
-
-```{r}
-lm.better2 <- lm(SRS_TotalRawScore ~ mABC_Balance.Component.StandardScore, data = kki.adhd2)
-summary(lm.better2)
-```
-
-```{r}
-ggplot(kki.adhd2,aes(x= mABC_TotalStandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth(colour = 'red') + geom_smooth(method = 'lm')
-```
 
 
-```{r}
-ggplot(kki.adhd1,aes(x= mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore)) + geom_point() + geom_jitter() + geom_smooth(method = 'lm') +geom_smooth(colour = 'red')
-```
 
-```{r}
-ggplot(data = kki.adhd,aes(x = mABC_AGE,y = SRS_TotalRawScore)) + geom_point() + geom_smooth(method = 'lm')
-```
+
+
 
 ```{r}
 ggplot(data = kki.adhd, aes(x = mABC_AGE,y = mABC_TotalStandardScore)) + geom_point() + geom_smooth()
 ```
 
 
-
+```{r}
+ggplot(data = kki.adhd, aes(x = mABC_AGE,y = SRS_TotalRawScore)) + geom_point() + geom_smooth()
+```
 
 
 

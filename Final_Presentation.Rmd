@@ -24,7 +24,7 @@ library(splines)
 kki.demo <- read.csv("Data/KKI_demographicInfo.csv")
 kki.social <- read.csv("Data/KKI_SocialResponsivenessScaleQuestionnaire.csv")
 kki.movement <- read.csv("Data/KKI_movementAssessmentBatteryforChildren.csv")
-kki.hand <- read.csv("Data\\KKI_handedness.csv")
+kki.hand <- read.csv("Data/KKI_handedness.csv")
 wisc <- read.csv("Data/KKI_WechslerIntelligenceScaleforChildren.csv")
 wisc4GAI <- read.csv("Data/wisc4GAI_lookup.csv")
 wisc5GAI <- read.csv("Data/wisc5GAI_lookup.csv")
@@ -300,7 +300,7 @@ females <- which(kki.adhd1$Gender == "F")
 
 ggplot(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd1)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
-  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Females)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
 ```
 
 
@@ -368,7 +368,7 @@ $$
 \end{bmatrix}
 $$
 
-```{r}
+```{r,echo=FALSE,include=FALSE}
 ggplot(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore,y = fitted(lm.adhd2), colour = factor(ADHD_Subtype))) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore, mABC_AimingAndCatching.Component.StandardScore *-.9143 + 54.637),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore, mABC_AimingAndCatching.Component.StandardScore *-.9143 + 45.883),colour = 'blue',size = 1.5) + ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") 
@@ -378,7 +378,6 @@ ggplot(data = kki.adhd2,aes(x = mABC_AimingAndCatching.Component.StandardScore,y
 ggplot(data = NULL,aes(x = fitted(lm.adhd2), y = residuals(lm.adhd2))) + geom_point() + geom_hline( yintercept = 0) +
   ggtitle("Residual Plot for ADHD Model(2)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
-
 
 
 ```{r,include= FALSE}
@@ -391,7 +390,6 @@ leverage.lmadhd2 <- influence(lm.adhd2)$hat
 ggplot(data = NULL,aes(x = leverage.lmadhd2, y = student.lmadhd2)) + geom_point() + geom_hline(y = 0)
 ```
 
-
 ```{r}
 anova(lm.basic2,lm.adhd2)
 ```
@@ -399,40 +397,105 @@ anova(lm.basic2,lm.adhd2)
 $$
 H_0: \text{Just Balance and Catching is Sufficient} \\
 H_1: \text{Full Model is Sufficient} \\
-\text{Under the null we got an F-statistic of 4.2735 where} \ F \sim F_{5,72} \\
-\text{which gives us a p-value of .0016 with an} \ \alpha = .05 \ \text{we reject the null} \\
+\text{Under the null we got an F-statistic of 2.6351 where} \ F \sim F_{5,72} \\
+\text{which gives us a p-value of .03 with an} \ \alpha = .05 \ \text{we reject the null} \\
 \text{and believe that we should keep every coefficient in the full model}
 $$
 
-
-
 ## Results: ASD
 
-```{r}
+- For SRS Version 1
 
-kki.aut <- subset(kki,kki$PrimaryDiagnosis == "Autism")
+```{r, include = FALSE,echo = FALSE}
+aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
+aut1 <- subset(aut, aut$SRS_VERSION == 1)
+aut2 <- subset(aut, aut$SRS_VERSION == 2)
 
+lm.aut1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + SecondaryDiagnosis + Gender + mABC_AGE, data = aut1)
+lm.aut1.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut1)
 ```
 
-## Conclusions
+$$
+\boldsymbol{\beta} = \begin{bmatrix}
+            \text{Intercept} \\
+            \text{Balance Score} \\
+            \text{Aiming And Catching Score} \\
+            \text{EdinburgHandedness_Integer} \\
+            \text{GAI} \\
+            \text{Secondary Diagnosis Yes} \\
+            \text{Gender Male} \\
+            \text{mABC_AGE} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+89.60022 \\
+0.47326 \\
+-2.28800  \\
+13.96288  \\
+-0.01026   \\
+1.25663 \\
+0.45815 \\
+ 0.87001 
+\end{bmatrix}
+$$
 
 
+```{r}
+ggplot(data = NULL,aes(x = fitted(lm.aut1), y = residuals(lm.aut1))) + geom_point() + geom_hline( yintercept = 0) +
+  ggtitle("Residual Plot for Autism Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
+```
 
+```{r}
+qqnorm(lm.aut1$residuals)
+qqline(lm.aut1$residuals, col = 'red')
+```
 
+```{r}
+plot(density(lm.aut1$residuals))
+```
 
+- For SRS Version 2
 
+```{r}
+lm.aut2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + SecondaryDiagnosis + Gender + mABC_AGE, data = aut2)
+lm.aut2.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut2)
+```
 
+$$
+\boldsymbol{\beta} = \begin{bmatrix}
+            \text{Intercept} \\
+            \text{Balance Score} \\
+            \text{Aiming And Catching Score} \\
+            \text{EdinburgHandedness_Integer} \\
+            \text{GAI} \\
+            \text{Secondary Diagnosis Yes} \\
+            \text{Gender Male} \\
+            \text{mABC_AGE} 
+\end{bmatrix}
+=
+\begin{bmatrix}
+58.690482 \\
+0.179097 \\
+0.767967  \\
+-2.043116  \\
+0.113743   \\
+8.627154 \\
+-4.782354 \\
+ 0.002163 
+\end{bmatrix}
+$$
 
+```{r}
+ggplot(data = NULL,aes(x = fitted(lm.aut2), y = residuals(lm.aut2))) + geom_point() + geom_hline( yintercept = 0) +
+  ggtitle("Residual Plot for Autism Model(2)") + xlab("Fitted Values") + ylab("Residual Values")
+```
 
+```{r}
+qqnorm(lm.aut2$residuals)
+qqline(lm.aut2$residuals, col = 'red')
+```
 
-
-
-
-
-
-
-
-
-
-
+```{r}
+plot(density(lm.aut2$residuals))
+```
 

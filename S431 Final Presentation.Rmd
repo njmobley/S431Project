@@ -453,11 +453,9 @@ qqline(lm.aut$residuals, col = 'red')
 
 ```{r}
 student.lmaut <- studentize(lm.aut)
-<<<<<<< HEAD
+
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
-=======
-leverage.lmaut <- lm.influence(lm.aut)$hat
+leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL, aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline(yintercept = 0)
->>>>>>> 7fd9726e45f19135bf0f7597a71831012562911b
 ```

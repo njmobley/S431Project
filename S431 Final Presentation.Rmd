@@ -382,7 +382,9 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
 
 ```{r,include= FALSE}
 studentize <- function(model) {
-  s = (1/85) * sum(residuals(model)^2)
+  n = length(fitted(model))
+  p = length(model$coefficients)
+  s = (1/(n-p-1)) * sum(residuals(model)^2)
   residuals(model)/ (s * (sqrt(1-influence(model)$hat)))
 }
 student.lmadhd <- studentize(lm.adhd)

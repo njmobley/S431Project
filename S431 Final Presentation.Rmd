@@ -1,5 +1,6 @@
 ---
-title: "Models to Determine Relationship of Motor Skills on Social Deficit"
+title: "Linear Models S431 Final Presentation:"
+subtitle: "Exploring the Relationship between Motor Skills and Social Deficits in Children"
 author: "Alli, Nick, Thomas"
 date: "12/4/2019"
 output: 
@@ -109,36 +110,26 @@ kki.adhd2 <- subset(kki.adhd, kki.adhd$SRS_VERSION == 2)
 ```
 
 
-## Introduction: Study Details & Relevant Background Information
+## Study Details & Relevant Background Information
 
 - Autism (ASD) and Attention Deficit/Hyperactivity Disorder (ADHD) are frequently observed in children, but are still not fully understood. 
 
-- Researchers at Kennedy Krieger Institute(KKI)  ran a study on children with ASD, ADHD, and typically developing children to study differences in social deficits, motor impairment, intelligence.
+
     - It is known that children with developmental disorders suffer from motor impairment concurrent with social deficits       associated with their respective diagnoses(1,2).  The extent and cause of this correlation merits further research.
 
-- Metrics and Scales Used to Quantify Symptom Severity in Children:
-    1. Social Responsiveness Scale Questionnaire (SRS): measures severity of social deficits in children (higher scores indicate more social deficits)
-    2. Movement Assessment Battery for Children (mABC): measures motor impairments in children.  Three subcategories for assessment include dexterity, aiming and catching, and balance summed to obtain the mABC Total Standard Score
-    3. Wechsler Intelligence Scale for Children (WISC): measures intelligence in children.  Two versions of the test quantify vocabulary, information, picture concepts, etc. 
+- Kennedy Krieger Institute(KKI) Study: Data Collected for Investigation and Analysis: 
 
-## Introduction: Areas of Particular Interest
-### Data and Analysis
+         Social Responsiveness Scale Questionnaire (SRS), Movement Assessment Battery 
+         for Children (mABC), Wechsler Intelligence Scale for Children (WISC), Gender, 
+         Age,Handedness (quantified by Edinburgh Handedness Integer), Primary and 
+         Secondary Diagnosis
 
 - We want to investigate the overall association between social deficits and motor skills for each diagnosis group.
 
-
-    <large>> Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.</large>
+    - Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.
   
-    <large>> Secondary Endpoint: What factors influence this association?</large>
-    
-- Data Collected for Investigation and Analysis:
-    - Age
-    - Handedness (quantified by Edinburgh Handedness Integer)
-    - Gender
-    - Primary and Secondary Diagnosis
-    - SRS Total
-    - mABC Total and Subscores
-    - WISC Score
+    - Secondary Endpoint: What factors influence this association?
+
 
 ## Methods: Cleaning Data
 
@@ -355,7 +346,7 @@ $$
 \end{bmatrix}
 $$
 
-```{r,include = FALSE,echo = FALSE}
+```{r}
 ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
@@ -369,7 +360,11 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
   ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
-
+```{r}
+CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
+CI_LB_adhd <- CI_adhd[1]
+CI_UB_adhd <- CI_adhd[2]
+```
 
 ```{r,include= FALSE}
 studentize <- function(model) {
@@ -403,7 +398,6 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
-lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
 summary(lm.aut)
 ```
 
@@ -444,9 +438,6 @@ qqline(lm.aut$residuals, col = 'red')
 
 ```{r}
 student.lmaut <- studentize(lm.aut)
-
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
-leverage.lmaut <- influence(lm.aut)$hat
-ggplot(data = NULL, aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline(yintercept = 0)
 ```

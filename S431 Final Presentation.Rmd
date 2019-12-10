@@ -234,9 +234,9 @@ ggarrange(gaisrs1, gaisrs2, hand2, hand1, nrow=1,common.legend = TRUE, legend="b
 
 - Key Takeaways: 
 
-  > There seems to be a negative correlation between intelligence and motor skills, but no correlation between intelligence and social deficit.
+  > There seems to be a strong negative correlation between intelligence and motor skills, but moderate positive correlation between intelligence and social deficit.
   
-  > Something is going on with Mixed-handedness(?) <- Nick, approve this
+  > The different groups seem to have similiar Social Deficits, but vastly different Motor SKills.
 
 ## Proposed Models
 

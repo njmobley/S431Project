@@ -448,4 +448,8 @@ qqnorm(lm.aut$residuals)
 qqline(lm.aut$residuals, col = 'red')
 ```
 
-
+```{r}
+student.lmaut <- standardize(lm.aut)
+leverage.lmaut <- lm.influence(lm.aut)$hat
+ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
+```

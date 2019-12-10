@@ -25,13 +25,13 @@ library(ggpubr)
 ```
 
 ```{r, echo=FALSE,include=FALSE}
-kki.demo <- read.csv("KKI_demographicInfo.csv")
-kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
-kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
-kki.hand <- read.csv("KKI_handedness.csv")
-wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
-wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
-wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
+kki.demo <- read.csv("Data/KKI_demographicInfo.csv")
+kki.social <- read.csv("Data/KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("Data/KKI_movementAssessmentBatteryforChildren.csv")
+kki.hand <- read.csv("Data/KKI_handedness.csv")
+wisc <- read.csv("Data/KKI_WechslerIntelligenceScaleforChildren.csv")
+wisc4GAI <- read.csv("Data/wisc4GAI_lookup.csv")
+wisc5GAI <- read.csv("Data/wisc5GAI_lookup.csv")
 colnames(kki.demo)[1] <- "ID"
 colnames(kki.social)[1] <- "ID"
 colnames(kki.movement)[1] <- "ID"
@@ -75,6 +75,22 @@ kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 kki <- merge(kki,wisc.combo)
 kki <- merge(kki,kki.hand)
+## Making standard Scores
+kki.V1 <- subset(kki,kki$SRS_VERSION == 1)
+kki.V2 <- subset(kki,kki$SRS_VERSION == 2)
+
+Two_to_One <- function(from,target) {
+  y.bar = mean(target);y.sd = sd(target);
+  x.bar = mean(from);x.sd = sd(from);
+  right.half = (y.bar - (y.sd/x.sd) * x.bar)
+  left.half = y.sd/x.sd
+  return (left.half * from + right.half)
+}
+kki.V1$Standard <- kki.V1$SRS_TotalRawScore
+kki.V2$Standard <- Two_to_One(kki.V2$SRS_TotalRawScore,kki.V1$SRS_TotalRawScore)
+kki <- rbind(kki.V1,kki.V2)
+
+
 ## 555
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.

@@ -409,8 +409,9 @@ $$
 
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
-lm.aut <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
 lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
+summary(lm.aut)
 ```
 
 $$
@@ -420,20 +421,20 @@ $$
             \text{Aiming And Catching Score} \\
             \text{EdinburgHandedness_Integer} \\
             \text{GAI} \\
-            \text{Secondary Diagnosis Yes} \\
+            \text{ADHD Subtype Inattentive} \\
             \text{Gender Male} \\
             \text{mABC_AGE} 
 \end{bmatrix}
 =
 \begin{bmatrix}
-89.60022 \\
-0.47326 \\
--2.28800  \\
-13.96288  \\
--0.01026   \\
-1.25663 \\
-0.45815 \\
- 0.87001 
+54.25094 \\
+0.37661 \\
+-0.02558  \\
+4.40532  \\
+0.14978   \\
+11.15424 \\
+-6.57359 \\
+ 1.22425 
 \end{bmatrix}
 $$
 

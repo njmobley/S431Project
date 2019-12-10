@@ -410,10 +410,8 @@ $$
 
 ```{r, include = FALSE,echo = FALSE}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
-aut1 <- subset(aut, aut$SRS_VERSION == 1)
-aut2 <- subset(aut, aut$SRS_VERSION == 2)
-lm.aut1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + SecondaryDiagnosis + Gender + mABC_AGE, data = aut1)
-lm.aut1.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut1)
+lm.aut <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + SecondaryDiagnosis + Gender + mABC_AGE, data = aut)
+lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
 ```
 
 $$
@@ -442,60 +440,17 @@ $$
 
 
 ```{r}
-ggplot(data = NULL,aes(x = fitted(lm.aut1), y = residuals(lm.aut1))) + geom_point() + geom_hline( yintercept = 0) +
+ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point() + geom_hline( yintercept = 0) +
   ggtitle("Residual Plot for Autism Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
 ```{r}
-qqnorm(lm.aut1$residuals)
-qqline(lm.aut1$residuals, col = 'red')
+qqnorm(lm.aut$residuals)
+qqline(lm.aut$residuals, col = 'red')
 ```
 
 ```{r}
-plot(density(lm.aut1$residuals))
+plot(density(lm.aut$residuals))
 ```
 
-- For SRS Version 2
 
-```{r}
-lm.aut2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + SecondaryDiagnosis + Gender + mABC_AGE, data = aut2)
-lm.aut2.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut2)
-```
-
-$$
-\boldsymbol{\beta} = \begin{bmatrix}
-            \text{Intercept} \\
-            \text{Balance Score} \\
-            \text{Aiming And Catching Score} \\
-            \text{EdinburgHandedness_Integer} \\
-            \text{GAI} \\
-            \text{Secondary Diagnosis Yes} \\
-            \text{Gender Male} \\
-            \text{mABC_AGE} 
-\end{bmatrix}
-=
-\begin{bmatrix}
-58.690482 \\
-0.179097 \\
-0.767967  \\
--2.043116  \\
-0.113743   \\
-8.627154 \\
--4.782354 \\
- 0.002163 
-\end{bmatrix}
-$$
-
-```{r}
-ggplot(data = NULL,aes(x = fitted(lm.aut2), y = residuals(lm.aut2))) + geom_point() + geom_hline( yintercept = 0) +
-  ggtitle("Residual Plot for Autism Model(2)") + xlab("Fitted Values") + ylab("Residual Values")
-```
-
-```{r}
-qqnorm(lm.aut2$residuals)
-qqline(lm.aut2$residuals, col = 'red')
-```
-
-```{r}
-plot(density(lm.aut2$residuals))
-```

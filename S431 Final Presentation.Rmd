@@ -423,7 +423,6 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
-summary(lm.aut)
 ```
 
 $$
@@ -472,8 +471,10 @@ qqnorm(lm.aut$residuals)
 qqline(lm.aut$residuals, col = 'red')
 ```
 
-```{r}
+```{r, include = FALSE}
 student.lmaut <- studentize(lm.aut)
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
 ```
+
+## Concluding Thoughts

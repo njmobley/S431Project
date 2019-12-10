@@ -272,8 +272,8 @@ $$
 ```{r}
 nodia1 <- subset(nodia,nodia$SRS_VERSION == 1)
 nodia2 <- subset(nodia,nodia$SRS_VERSION == 2)
-lm.nodia1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia1)
-lm.nodia2 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia2)
+lm.nodia1 <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia1)
+lm.nodia2 <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia2)
 ```
 
 

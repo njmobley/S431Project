@@ -155,23 +155,24 @@ mixedCount <- c(length(which((kki.asd$Hand == "Mixed"))),length(which((kki.adhd$
 table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,leftCount,mixedCount,rightCount)
 FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","Left","Mixed","Right"))
 agehist <-ggplot(data = kki.all,aes(x = mABC_AGE, colour = PrimaryDiagnosis, fill=PrimaryDiagnosis)) + geom_histogram(fill="white")+ylab("Age (Years)")+theme_classic() + geom_vline(xintercept = 14.5)
+Test.scores <- ggplot(data = kki, aes(group = SRS_VERSION, y = SRS_TotalRawScore,colour = factor(SRS_VERSION))) + geom_boxplot() + xlab("SRS_VERSION") + ylab("SRS_TotalRawScore") + facet_wrap(~PrimaryDiagnosis)
 ```
 
-- Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
-
-```{r, fig.height=2, fig.width=5, fig.align="center", include=TRUE}
-agehist
+```{r, fig.height=1.8, fig.width=13, fig.align="center", include=TRUE}
+ggarrange(agehist,Test.scores)
 ```
+
+- Standardized the test scores from SRS Version 2 so the mean and varaince match that of Version 1, using linear equating method^1^
 
 - Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore, reducing the total number of observations to 568.
 
 - Converted all the WISC scores to the GAI scale for comparability across versions
 
-```{r, height=1}
+```{r, height=.8}
 FinalTable
 ```
 
-
+<font size= "4">1 Equating Test Scores (without IRT) Second Edition Page 14, Samual A Livingston.</font>
 
 
 ## Methods: Exploring Motor Skill's Association with Social Deficits
@@ -234,7 +235,7 @@ ggarrange(gaisrs1, gaisrs2, hand2, hand1, nrow=1,common.legend = TRUE, legend="b
 
   > There seems to be a strong negative correlation between intelligence and motor skills, but moderate positive correlation between intelligence and social deficit.
   
-  > The different groups seem to have similiar Social Deficits, but vastly different Motor SKills.
+  > The different handed groups seem to have similiar Social Deficits, but vastly different Motor Sills.
 
 ## Proposed Models
 
@@ -258,24 +259,14 @@ kki.2 <- subset(kki,kki$SRS_VERSION == 2)
 t.test(kki.1$SRS_TotalRawScore,kki.2$SRS_TotalRawScore)
 ```
 
-Seperate SRS Versions from Welch t-test:
-
-$$
-H_0: \text{E[SRS Scores Version 1] = E[SRS Scores Version 2]} \\
-H_1: \text{E[SRS Scores Version 1]} \space \neq \text{E[SRS Scores Version 2]} \\
-\text{Under the null we got a t-statistc of -6.03 from a t-distribution of 417.38 } \\
-\text{that has a p-value of} \space 3.511 \times 10^{-9} \\ \space \text{Under} \space \alpha = .05 \space \text{we reject the null}
-\text{ and believe that there is a true difference in the mean}
-$$
-
 ## Resutls: Typically Developing
 
-```{r}
+```{r,include = FALSE}
 lm.nodia <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia)
 summary(lm.nodia)
-CI_nodia <- confint(lm.nodia, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'GenderM', 'mABC_AGE'))
-CI_LB_nodia <- CI_aut[1]
-CI_UB_nodia <- CI_aut[2]
+#CI_nodia <- confint(lm.nodia, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'GenderM', 'mABC_AGE'))
+#CI_LB_nodia <- CI_aut[1]
+#CI_UB_nodia <- CI_aut[2]
 ```
 
 
@@ -322,7 +313,12 @@ Adjusted R-Squared:  0.01153
 $$
 
 
-
+```{r, fig.height=3, fig.width=4}
+ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
+  ggtitle("Residual Plot for ADHD Model") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
+ggplot(data = NULL,aes(x = leverage.lmadhd, y = student.lmadhd)) + geom_point() + geom_hline(y = 0)
+qqnorm(lm.adhd$residuals) 
+```
 
 
 ## Results: ADHD
@@ -381,9 +377,9 @@ leverage.lmadhd <- influence(lm.adhd)$hat
 
 ```{r, fig.height=3, fig.width=4}
 ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
-  ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
+  ggtitle("Residual Plot for ADHD Model") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
 ggplot(data = NULL,aes(x = leverage.lmadhd, y = student.lmadhd)) + geom_point() + geom_hline(y = 0)
-qqnorm(lm.adhd$residuals)
+qqnorm(lm.adhd$residuals) 
 ```
 
 ```{r}
@@ -409,7 +405,7 @@ $$
 
 ## Results: ASD
 
-```{rm include = FALSE}
+```{r include = FALSE}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
 CI_aut <- confint(lm.aut, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
@@ -441,14 +437,14 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
-5.758935 - 9.609253 \\
--0.08243935 - 0.12536171  \\
--0.10562715 - 0.09304101 \\
--0.22848688 - 0.72182545  \\
--0.00295057 - 0.01902429   \\
--2.29020061 - 3.31623132 \\
--1.05821950 - 0.30144655 \\
--0.11999372 - 0.23958951
+5.758 - 9.609 \\
+-0.0824 - 0.125  \\
+-0.1056 - 0.093 \\
+-0.2285 - 0.7218  \\
+-0.00295 - 0.019   \\
+-2.2902 - 3.3162 \\
+-1.05821 - 0.30144 \\
+-0.11999 - 0.23959
 \end{bmatrix}
 $$
 

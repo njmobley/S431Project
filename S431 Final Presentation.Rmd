@@ -398,9 +398,9 @@ $$
 
 ## Results: ASD
 
-```{r, include = FALSE}
+```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
-lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+lm.aut <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
 summary(lm.aut)
 CI_aut <- confint(lm.aut, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
 CI_LB_aut <- CI_aut[1]
@@ -420,25 +420,25 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
-54.25094 \\
-0.37661 \\
--0.02558  \\
-4.40532  \\
-0.14978   \\
-11.15424 \\
--6.57359 \\
- 1.22425 
+7.684094 \\
+0.021461 \\
+-0.006293  \\
+0.246669  \\
+0.008037   \\
+0.513015 \\
+-0.378386 \\
+ 0.059798 
 \end{bmatrix}
 =
 \begin{bmatrix}
-18.95858 - 89.5433 \\
--1.52811116 - 2.2813354  \\
--1.84658543 - 1.7954352 \\
--4.30532586 - 13.1159718  \\
--0.05164134 - 0.3512058   \\
--40.23481750 - 62.5433065 \\
--19.03641089 - 5.8892330 \\
--2.07171924 - 4.5202255
+5.758935 - 9.609253 \\
+-0.08243935 - 0.12536171  \\
+-0.10562715 - 0.09304101 \\
+-0.22848688 - 0.72182545  \\
+-0.00295057 - 0.01902429   \\
+-2.29020061 - 3.31623132 \\
+-1.05821950 - 0.30144655 \\
+-0.11999372 - 0.23958951
 \end{bmatrix}
 $$
 

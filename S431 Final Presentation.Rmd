@@ -411,7 +411,6 @@ $$
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
 lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
-summary(lm.aut)
 ```
 
 $$
@@ -441,16 +440,12 @@ $$
 
 ```{r}
 ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point() + geom_hline( yintercept = 0) +
-  ggtitle("Residual Plot for Autism Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
+  ggtitle("Residual Plot for Autism Model") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
 ```{r}
 qqnorm(lm.aut$residuals)
 qqline(lm.aut$residuals, col = 'red')
-```
-
-```{r}
-plot(density(lm.aut$residuals))
 ```
 
 

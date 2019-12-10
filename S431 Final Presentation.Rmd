@@ -210,25 +210,25 @@ ggarrange(SRS.Manual, SRS.AimAndCatch, SRS.Balance, total, common.legend = TRUE,
 ## Methods: Other Variables
 
 ```{r, include=FALSE}
-gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="none")
-gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Motor Skills")+ theme(legend.position="none")
+gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="bottom")
+gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Motor Skills")+ theme(legend.position="bottom")
 ```
 
 
 ```{r, fig.height=4, fig.width=5, include=FALSE}
-ggarrange(gaisrs1, gaisrs2, nrow=1, common.legend = TRUE, legend="bottom")
+ggarrange(gaisrs1, gaisrs2, nrow=1, legend="bottom")
 ```
 
  
 
 ```{r, include=FALSE}
 kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
-hand1 <- ggplot(data = na.omit(kki),aes(group = Hand,y = mABC_TotalStandardScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")+ ylab("Total Motor Score")+ggtitle("Handedness & Motor Skills")
-hand2 <-ggplot(data = na.omit(kki),aes(group = Hand,y = Standard, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")+ ylab("SRS Total Score")+ggtitle("Handedness & Social Deficits")
+hand1 <- ggplot(data = na.omit(kki),aes(group = Hand,y = mABC_TotalStandardScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="bottom")+ ylab("Total Motor Score")+ggtitle("Handedness & Motor Skills")
+hand2 <-ggplot(data = na.omit(kki),aes(group = Hand,y = Standard, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="bottom")+ ylab("SRS Total Score")+ggtitle("Handedness & Social Deficits")
 ```
 
 ```{r, fig.height=4, fig.width=11, fig.align="left"}
-ggarrange(gaisrs1, gaisrs2, hand2, hand1, nrow=1,common.legend = TRUE, legend="bottom")
+ggarrange(gaisrs1, gaisrs2, hand2, hand1, nrow=1, legend="bottom")
 ```
 
 - Key Takeaways: 

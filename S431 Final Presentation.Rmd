@@ -423,6 +423,7 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+summary(lm.aut)
 ```
 
 $$
@@ -446,6 +447,17 @@ $$
 11.15424 \\
 -6.57359 \\
  1.22425 
+\end{bmatrix}
+=
+\begin{bmatrix}
+18.95858 - 89.5433 \\
+-0.145524016 - 0.0255974  \\
+-0.117046018 - 0.0327538 \\
+-0.05088326 - 0.70459855  \\
+-0.003114035 - 0.02013125   \\
+-1.849132324 - (-0.69237235) \\
+-0.654060303 - 0.31781322 \\
+-0.231019073 - 0.13630759
 \end{bmatrix}
 $$
 

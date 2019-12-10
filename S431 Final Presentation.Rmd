@@ -259,7 +259,7 @@ kki.2 <- subset(kki,kki$SRS_VERSION == 2)
 t.test(kki.1$SRS_TotalRawScore,kki.2$SRS_TotalRawScore)
 ```
 
-## Resutls: Typically Developing
+## Results: Typically Developing
 
 ```{r,include = FALSE}
 lm.nodia <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia)
@@ -271,8 +271,6 @@ summary(lm.nodia)
 
 
 $$
-\text{E[Social Deficit Score]} = \textbf{X} * \boldsymbol{\beta} \\
-where: \\
 \boldsymbol{\beta} = \begin{bmatrix}
             \text{Intercept} \\
             \text{Balance Score} \\
@@ -294,13 +292,13 @@ where: \\
 \end{bmatrix}
 =
 \begin{bmatrix}
-3.410752 - 4.98713 \\
--0.0743438711 - 0.03927879  \\
--0.1012364991 - 0.02435081 \\
--0.5748815094 - 0.05802266  \\
-0.0003657782 - 0.02119846   \\
--0.4461760871 - 0.35458960 \\
--0.1770922562 - 0.11279089
+3.4107 - 4.987 \\
+-0.07434 - 0.03927  \\
+-0.10123 - 0.02435 \\
+-0.57488 - 0.05802  \\
+0.0003657 - 0.0212   \\
+-0.44617 - 0.3546 \\
+-0.177092 - 0.1128
 \end{bmatrix}
 $$
 
@@ -312,12 +310,22 @@ $$
 Adjusted R-Squared:  0.01153
 $$
 
+```{r ,include = FALSE}
+studentize <- function(model) {
+  n = length(fitted(model))
+  p = length(model$coefficients)
+  s = (1/(n-p-1)) * sum(residuals(model)^2)
+  residuals(model)/ (s * (sqrt(1-influence(model)$hat)))
+}
+student.lmnoDia <- studentize(lm.nodia)
+leverage.lmnoDia <- influence(lm.nodia)$hat
+```
 
 ```{r, fig.height=3, fig.width=4}
-ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
-  ggtitle("Residual Plot for ADHD Model") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
-ggplot(data = NULL,aes(x = leverage.lmadhd, y = student.lmadhd)) + geom_point() + geom_hline(y = 0)
-qqnorm(lm.adhd$residuals) 
+ggplot(data = NULL,aes(x = fitted(lm.nodia), y = residuals(lm.nodia))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
+  ggtitle("Residual Plot for TD Model") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
+ggplot(data = NULL,aes(x = leverage.lmnoDia, y = student.lmnoDia)) + geom_point() + geom_hline(y = 0)
+qqnorm(lm.nodia$residuals) 
 ```
 
 

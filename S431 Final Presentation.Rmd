@@ -320,8 +320,7 @@ $$
 
 ```{r,echo=FALSE,include=FALSE}
 lm.adhd <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd)
-lm.basic <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + mABC_ManualDexterity.Component.StandardScore, data = kki.adhd)
-lm.maybe <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore,data = kki.adhd)
+lm.basic <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + mABC_ManualDexterity.Component.StandardScore, data = kki.adhd)
 ```
 
 $$
@@ -359,41 +358,6 @@ $$
 \end{bmatrix}
 $$
 
-
-```{r}
-ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
-  geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
-  geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
-```
-
-
-```{r, include=FALSE}
-males <- which(kki.adhd1$Gender == "M")
-ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
-  geom_line(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
-  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
-```
-
-```{r, include=FALSE}
-females <- which(kki.adhd1$Gender == "F")
-ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
-  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
-  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Females)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
-```
-
-
-
-```{r, fig.height=3, fig.width=4}
-ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
-  ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
-```
-
-```{r}
-CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
-CI_LB_adhd <- CI_adhd[1]
-CI_UB_adhd <- CI_adhd[2]
-```
-
 ```{r,include= FALSE}
 studentize <- function(model) {
   n = length(fitted(model))
@@ -405,17 +369,30 @@ student.lmadhd <- studentize(lm.adhd)
 leverage.lmadhd <- influence(lm.adhd)$hat
 ```
 
-```{r,include=FALSE}
+
+```{r, fig.height=3, fig.width=4}
+ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth() +
+  ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")+theme_classic()
 ggplot(data = NULL,aes(x = leverage.lmadhd, y = student.lmadhd)) + geom_point() + geom_hline(y = 0)
+qqnorm(lm.adhd$residuals)
+```
+
+```{r}
+CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
+CI_LB_adhd <- CI_adhd[1]
+CI_UB_adhd <- CI_adhd[2]
 ```
 
 
+```{r,include = FALSE,echo = FALSE}
+anova(lm.basic,lm.adhd)
+```
 
 $$
 H_0: \text{Just Balance and Catching is Sufficient} \\
 H_1: \text{Full Model is Sufficient} \\
-\text{Under the null we got an F-statistic of 4.2735 where} \ F \sim F_{5,85} \\
-\text{which gives us a p-value of .0016 with an} \ \alpha = .05 \ \text{we reject the null} \\
+\text{Under the null we got an F-statistic of 5.905 where} \ F \sim F_{4,165} \\
+\text{which gives us a p-value of .00018 with an} \ \alpha = .05 \ \text{we reject the null} \\
 \text{and believe that we should keep every coefficient in the full model}
 $$
 

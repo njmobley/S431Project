@@ -341,14 +341,14 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
-64.0176 \\
--2.3512 \\
-1.3089  \\
-8.3848  \\
-0.0620   \\
--13.9720 \\
--9.3211 \\
- -1.1236 
+7.24 \\
+-0.0408 \\
+-0.0646  \\
+0.3292  \\
+0.0085   \\
+-1.266 \\
+-0.175 \\
+-0.049 
 \end{bmatrix}
 $$
 
@@ -381,11 +381,11 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
 
 
 ```{r,include= FALSE}
-standardize <- function(model) {
+studentize <- function(model) {
   s = (1/85) * sum(residuals(model)^2)
   residuals(model)/ (s * (sqrt(1-influence(model)$hat)))
 }
-student.lmadhd <- standardize(lm.adhd)
+student.lmadhd <- studentize(lm.adhd)
 leverage.lmadhd <- influence(lm.adhd)$hat
 ```
 

@@ -449,11 +449,6 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
-<<<<<<< HEAD
-lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
-=======
->>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
-summary(lm.aut)
 ```
 
 $$
@@ -493,14 +488,6 @@ qqline(lm.aut$residuals, col = 'red')
 
 ```{r}
 student.lmaut <- studentize(lm.aut)
-<<<<<<< HEAD
-
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
-leverage.lmaut <- influence(lm.aut)$hat
-ggplot(data = NULL, aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline(yintercept = 0)
-=======
-leverage.lmaut <- influence(lm.aut)$hat
-ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
->>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 ```

@@ -89,7 +89,7 @@ Two_to_One <- function(from,target) {
 kki.V1$Standard <- kki.V1$SRS_TotalRawScore
 kki.V2$Standard <- Two_to_One(kki.V2$SRS_TotalRawScore,kki.V1$SRS_TotalRawScore)
 kki <- rbind(kki.V1,kki.V2)
-
+kki$sqrt.Standard <- sqrt(kki$Standard)
 ## 555
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
@@ -165,7 +165,6 @@ agehist <-ggplot(data = na.omit(kki),aes(group = PrimaryDiagnosis, y = mABC_AGE,
 - Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
 
 ```{r, fig.height=2, fig.width=5, fig.align="center"}
-
 agehist
 ```
 
@@ -307,11 +306,15 @@ where: \\
 -1.12175  \\
 -0.09471
 \end{bmatrix}
-
 $$
 
-$$P-Value=0.3062$$
-$$Adjusted R-Squared:  0.01153 $$
+
+$$
+P-Value=0.3062
+$$
+$$
+Adjusted R-Squared:  0.01153
+$$
 
 
 
@@ -320,8 +323,9 @@ $$Adjusted R-Squared:  0.01153 $$
 ## Results: ADHD
 
 ```{r,echo=FALSE,include=FALSE}
-lm.adhd <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd)
-lm.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = kki.adhd)
+lm.adhd <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd)
+lm.basic <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + mABC_ManualDexterity.Component.StandardScore, data = kki.adhd)
+lm.maybe <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore,data = kki.adhd)
 ```
 
 $$
@@ -386,13 +390,10 @@ leverage.lmadhd <- influence(lm.adhd)$hat
 ```
 
 ```{r,include=FALSE}
-ggplot(data = NULL,aes(x = leverage.lmadhd1, y = student.lmadhd1)) + geom_point() + geom_hline(y = 0)
+ggplot(data = NULL,aes(x = leverage.lmadhd, y = student.lmadhd)) + geom_point() + geom_hline(y = 0)
 ```
 
 
-```{r}
-anova(lm.basic,lm.adhd)
-```
 
 $$
 H_0: \text{Just Balance and Catching is Sufficient} \\

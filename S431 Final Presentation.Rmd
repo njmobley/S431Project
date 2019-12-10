@@ -213,7 +213,7 @@ gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = P
 ```
 
 
-```{r, fig.height=4, fig.width=5, include=FALSE}
+```{r, fig.height=4, fig.width=5, include = FALSE}
 ggarrange(gaisrs1, gaisrs2, nrow=1, common.legend = TRUE, legend="bottom")
 ```
 
@@ -269,7 +269,7 @@ $$
 
 ## Resutls: Typically Developing
 
-```{r}
+```{r, include = FALSE}
 nodia1 <- subset(nodia,nodia$SRS_VERSION == 1)
 nodia2 <- subset(nodia,nodia$SRS_VERSION == 2)
 lm.nodia1 <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI  + Gender + mABC_AGE, data = nodia1)
@@ -364,14 +364,14 @@ ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(l
 ```
 
 
-```{r}
+```{r, include = FALSE}
 males <- which(kki.adhd1$Gender == "M")
 ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
 ```
 
-```{r}
+```{r, include = FALSE}
 females <- which(kki.adhd1$Gender == "F")
 ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
@@ -385,7 +385,7 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
   ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
-```{r}
+```{r, include = FALSE}
 CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
 CI_LB_adhd <- CI_adhd[1]
 CI_UB_adhd <- CI_adhd[2]

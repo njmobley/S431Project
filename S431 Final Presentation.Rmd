@@ -163,9 +163,7 @@ agehist <-ggplot(data = kki.all,aes(x = mABC_AGE, colour = PrimaryDiagnosis, fil
 agehist
 ```
 
-- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 568 Observations
-
-
+- Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore, reducing the total number of observations to 568.
 
 - Converted all the WISC scores to the GAI scale for comparability across versions
 

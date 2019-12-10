@@ -260,8 +260,8 @@ t.test(kki.1$SRS_TotalRawScore,kki.2$SRS_TotalRawScore)
 - seperate SRS Versions from Welch t-test
 
 $$
-H_0: \text{Mean of SRS Total Scores from Version 1 = Mean of SRS Total Scores from Version 2} \\
-H_1: \text{Mean of SRS Total Scores from Version 1} \space \neq \text{Mean of SRS Total Scores from Version 2} \\
+H_0: \text{E[SRS Scores Version 1] = E[SRS Scores Version 2} \\
+H_1: \text{E[SRS Total from Version 1]} \space \neq \text{E[SRS Scores from Version 2]} \\
 \text{Under the null we got a t-statistc of -6.03 from a t-distribution of 417.38 Degrees of Freedom} \\
 \text{that has a p-value of} \space 3.511 \times 10^{-9} \\ \space \text{Under} \space \alpha = .05 \space \text{we reject the null}
 \text{ and believe that there is a true difference in the mean}

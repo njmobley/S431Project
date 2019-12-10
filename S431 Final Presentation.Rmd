@@ -90,7 +90,6 @@ kki.V1$Standard <- kki.V1$SRS_TotalRawScore
 kki.V2$Standard <- Two_to_One(kki.V2$SRS_TotalRawScore,kki.V1$SRS_TotalRawScore)
 kki <- rbind(kki.V1,kki.V2)
 
-
 ## 555
 #Now have all the data in a huge data frame
 #Removing N/A values. Mostly removing second visits.
@@ -185,22 +184,22 @@ FinalTable
 
 ```{r,echo = FALSE}
 graph.dat <- subset(kki,kki$mABC_TotalStandardScore <12)
-total <- ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Motor Ability and Social Deficits")+ theme(legend.position = 'none')
+total <- ggplot(data = graph.dat, aes(x = mABC_TotalStandardScore, y = Standard,colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ylab("SRS Total Score")+xlab("Motor Assessment Score")+ggtitle("Overall Motor Ability and Social Deficits")+ theme(legend.position = 'none')
 ```
 
 ```{r,echo = FALSE,include=FALSE}
-SRS.Manual <- ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Manual Dexterity Score")+ggtitle("Manual Dexterity and Social Deficits")
+SRS.Manual <- ggplot(data = kki, aes(x = mABC_ManualDexterity.Component.StandardScore, y = Standard, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Manual Dexterity Score")+ggtitle("Manual Dexterity and Social Deficits")
 ```
 
 ```{r,echo = FALSE,include=FALSE}
-SRS.AimAndCatch <- ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Aiming and Catching Score")+ggtitle("Aiming & Catching and Social Deficits")
+SRS.AimAndCatch <- ggplot(data = kki, aes(x = mABC_AimingAndCatching.Component.StandardScore, y = Standard, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth()+ theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Aiming and Catching Score")+ggtitle("Aiming & Catching and Social Deficits")
 ```
 
 ```{r,echo = FALSE,include=FALSE}
 #Really interesting! 
 #The better the ADHD kids were at balance the better their social deficit was! Let's investigate the relationship between age and balance
 graph.dat <- subset(kki, kki$mABC_Balance.Component.StandardScore < 15)
-SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Balance Score")+ggtitle("Balance and Social Deficits")
+SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardScore, y = Standard, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Balance Score")+ggtitle("Balance and Social Deficits")
 ```
 
 ```{r,echo = FALSE, fig.height=5, fig.align="center", fig.width=8}
@@ -216,7 +215,7 @@ the subcomponents of the mABC, and differ for children with different primary di
 ## Methods: Other Variables
 
 ```{r, include=FALSE}
-gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = SRS_TotalRawScore,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="none")
+gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="none")
 gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Motor Skills")+ theme(legend.position="none")
 
 ```
@@ -231,7 +230,7 @@ ggarrange(gaisrs1, gaisrs2, nrow=1, common.legend = TRUE, legend="bottom")
 ```{r, include=FALSE}
 kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 hand1 <- ggplot(data = na.omit(kki),aes(group = Hand,y = mABC_TotalStandardScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")
-hand2 <-ggplot(data = na.omit(kki),aes(group = Hand,y = SRS_TotalRawScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")
+hand2 <-ggplot(data = na.omit(kki),aes(group = Hand,y = Standard, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")
 ```
 
 ```{r, fig.height=4, fig.width=15, fig.align="left"}
@@ -259,11 +258,6 @@ where: \\
             \text{mABC_AGE} 
             \end{bmatrix}
 $$
-
-```{r}
-kki.1 <- subset(kki,kki$SRS_VERSION == 1)
-kki.2 <- subset(kki,kki$SRS_VERSION == 2)
-```
 
 ```{r,include=FALSE}
 t.test(kki.1$SRS_TotalRawScore,kki.2$SRS_TotalRawScore)
@@ -323,11 +317,9 @@ $$Adjusted R-Squared:  0.01153 $$
 
 ## Results: ADHD
 
-- For SRS Version 1
-
 ```{r,echo=FALSE,include=FALSE}
-lm.adhd1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd1)
-lm.basic1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = kki.adhd1)
+lm.adhd <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = kki.adhd)
+lm.basic1 <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = kki.adhd)
 ```
 
 $$

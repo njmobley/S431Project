@@ -148,14 +148,19 @@ agehist <-ggplot(data = na.omit(kki),aes(group = PrimaryDiagnosis, y = mABC_AGE,
 ```
 
 - Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
-- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 568 Observations
-- Converted all the WISC scores to the GAI scale for comparability
 
+```{r, fig.height=2, fig.width=5, fig.align="center"}
+
+agehist
+```
+
+- Then Removed Observations that had N/A values for either SRS_TotalRawScore or mABC_TotalStandardScore which furthur reduced the total observations to 568 Observations
+- Converted all the WISC scores to the GAI scale for comparability across versions
 
 ```{r}
 FinalTable
-agehist
 ```
+
 
 
 
@@ -182,7 +187,7 @@ graph.dat <- subset(kki, kki$mABC_Balance.Component.StandardScore < 15)
 SRS.Balance <- ggplot(data = graph.dat, aes(x = mABC_Balance.Component.StandardScore, y = SRS_TotalRawScore, colour = PrimaryDiagnosis)) + geom_point(alpha = .3) + geom_jitter() + geom_smooth() + theme(legend.position = 'none')+ylab("SRS Total Score")+xlab("Balance Score")+ggtitle("Balance and Social Deficits")
 ```
 
-```{r,echo = FALSE, height=4}
+```{r,echo = FALSE, fig.height=5, fig.align="center", fig.width=8}
 ggarrange(SRS.Manual, SRS.AimAndCatch, SRS.Balance, total, common.legend = TRUE, legend="bottom")
 ```
 
@@ -201,7 +206,7 @@ gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = P
 ```
 
 
-```{r}
+```{r, fig.height=4, fig.width=5, include=FALSE}
 ggarrange(gaisrs1, gaisrs2, nrow=1, common.legend = TRUE, legend="bottom")
 ```
 
@@ -213,8 +218,8 @@ hand1 <- ggplot(data = na.omit(kki),aes(group = Hand,y = mABC_TotalStandardScore
 hand2 <-ggplot(data = na.omit(kki),aes(group = Hand,y = SRS_TotalRawScore, colour = Hand)) + geom_boxplot() + facet_wrap(na.omit(kki)$PrimaryDiagnosis)+ theme(legend.position="none")
 ```
 
-```{r}
-ggarrange(hand1, hand2, nrow=1,common.legend = TRUE, legend="bottom")
+```{r, fig.height=4, fig.width=15, fig.align="left"}
+ggarrange(gaisrs1, gaisrs2, hand1, hand2, nrow=1,common.legend = TRUE, legend="bottom")
 ```
 
 - Key Takeaways: 

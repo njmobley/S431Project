@@ -76,6 +76,7 @@ kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 kki <- merge(kki,wisc.combo)
 kki <- merge(kki,kki.hand)
+kki.all <- cbind(kki,rep(1,nrow(kki)))
 kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 ## Making standard Scores
 kki.V1 <- subset(kki,kki$SRS_VERSION == 1)
@@ -153,12 +154,12 @@ leftCount <- c(length(which((kki.asd$Hand == "Left"))),length(which(kki.adhd$Han
 mixedCount <- c(length(which((kki.asd$Hand == "Mixed"))),length(which((kki.adhd$Hand == "Mixed"))),length(which((kki.td$Hand == "Mixed"))))
 table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,leftCount,mixedCount,rightCount)
 FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","Left","Mixed","Right"))
-agehist <-ggplot(data = na.omit(kki),aes(x = mABC_AGE, colour = PrimaryDiagnosis, fill=PrimaryDiagnosis)) + geom_histogram(fill="white")+ylab("Age (Years)")+theme_classic() 
+agehist <-ggplot(data = kki.all,aes(x = mABC_AGE, colour = PrimaryDiagnosis, fill=PrimaryDiagnosis)) + geom_histogram(fill="white")+ylab("Age (Years)")+theme_classic() + geom_vline(xintercept = 14.5)
 ```
 
 - Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
 
-```{r, fig.height=2, fig.width=5, fig.align="center", include=FALSE}
+```{r, fig.height=2, fig.width=5, fig.align="center", include=TRUE}
 agehist
 ```
 

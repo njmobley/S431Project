@@ -398,7 +398,7 @@ $$
 
 ## Results: ASD
 
-```{r}
+```{r, include = FALSE}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
 summary(lm.aut)

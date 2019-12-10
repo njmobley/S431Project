@@ -463,3 +463,15 @@ ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + 
 ```
 
 ## Concluding Thoughts
+
+- For Typically Developing Subjects could not make distinguished correlation between motor ability and Social Deficit
+
+- Subjects with ADHD had a slight correlation, Increased Motor skills corelated with less social deficits
+
+- Subjects with Autism had indesernable relationship between Motor skills and Social Deficits.
+
+
+
+
+
+

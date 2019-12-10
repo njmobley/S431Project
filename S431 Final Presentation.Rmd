@@ -401,15 +401,6 @@ CI_UB_adhd <- CI_adhd[2]
 anova(lm.basic,lm.adhd)
 ```
 
-$$
-H_0: \text{Just Balance and Catching is Sufficient} \\
-H_1: \text{Full Model is Sufficient} \\
-\text{Under the null we got an F-statistic of 5.905 where} \ F \sim F_{4,165} \\
-\text{which gives us a p-value of .00018 with an} \ \alpha = .05 \ \text{we reject the null} \\
-\text{and believe that we should keep every coefficient in the full model}
-$$
-
-
 
 ## Results: ASD
 
@@ -458,21 +449,15 @@ $$
 
 
 ```{r, fig.height=3, fig.width=4}
-ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth()+
-  ggtitle("Residual Plot for Autism Model") + xlab("Fitted Values") + ylab("Residual Values") +theme_classic()
-```
-
-```{r, include=FALSE}
-qqnorm(lm.aut$residuals)
-qqline(lm.aut$residuals, col = 'red')
-```
-
-```{r, include = FALSE}
-## There are some changes/
 student.lmaut <- studentize(lm.aut)
 leverage.lmaut <- influence(lm.aut)$hat
+ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point() + geom_hline( yintercept = 0) + geom_smooth()+
+  ggtitle("Residual Plot for Autism Model") + xlab("Fitted Values") + ylab("Residual Values") +theme_classic()
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
+qqnorm(lm.aut$residuals)
+
 ```
+
 
 ## Concluding Thoughts
 

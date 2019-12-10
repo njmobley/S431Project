@@ -352,7 +352,7 @@ $$
 \end{bmatrix}
 $$
 
-```{r,include = FALSE,echo = FALSE}
+```{r}
 ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
@@ -378,7 +378,11 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
   ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
-
+```{r}
+CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
+CI_LB_adhd <- CI_adhd[1]
+CI_UB_adhd <- CI_adhd[2]
+```
 
 ```{r,include= FALSE}
 studentize <- function(model) {
@@ -412,7 +416,6 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
-lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
 summary(lm.aut)
 ```
 
@@ -453,9 +456,6 @@ qqline(lm.aut$residuals, col = 'red')
 
 ```{r}
 student.lmaut <- studentize(lm.aut)
-
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
-leverage.lmaut <- influence(lm.aut)$hat
-ggplot(data = NULL, aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline(yintercept = 0)
 ```

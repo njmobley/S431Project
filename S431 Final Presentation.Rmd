@@ -1,6 +1,5 @@
 ---
-title: "Linear Models S431 Final Presentation:"
-subtitle: "Exploring the Relationship between Motor Skills and Social Deficits in Children"
+title: "Models to Determine Relationship of Motor Skills on Social Deficit"
 author: "Alli, Nick, Thomas"
 date: "12/4/2019"
 output: 
@@ -26,13 +25,13 @@ library(ggpubr)
 ```
 
 ```{r, echo=FALSE,include=FALSE}
-kki.demo <- read.csv("Data/KKI_demographicInfo.csv")
-kki.social <- read.csv("Data/KKI_SocialResponsivenessScaleQuestionnaire.csv")
-kki.movement <- read.csv("Data/KKI_movementAssessmentBatteryforChildren.csv")
-kki.hand <- read.csv("Data/KKI_handedness.csv")
-wisc <- read.csv("Data/KKI_WechslerIntelligenceScaleforChildren.csv")
-wisc4GAI <- read.csv("Data/wisc4GAI_lookup.csv")
-wisc5GAI <- read.csv("Data/wisc5GAI_lookup.csv")
+kki.demo <- read.csv("KKI_demographicInfo.csv")
+kki.social <- read.csv("KKI_SocialResponsivenessScaleQuestionnaire.csv")
+kki.movement <- read.csv("KKI_movementAssessmentBatteryforChildren.csv")
+kki.hand <- read.csv("KKI_handedness.csv")
+wisc <- read.csv("KKI_WechslerIntelligenceScaleforChildren.csv")
+wisc4GAI <- read.csv("wisc4GAI_lookup.csv")
+wisc5GAI <- read.csv("wisc5GAI_lookup.csv")
 colnames(kki.demo)[1] <- "ID"
 colnames(kki.social)[1] <- "ID"
 colnames(kki.movement)[1] <- "ID"
@@ -76,11 +75,9 @@ kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 kki <- merge(kki,wisc.combo)
 kki <- merge(kki,kki.hand)
-kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 ## Making standard Scores
 kki.V1 <- subset(kki,kki$SRS_VERSION == 1)
 kki.V2 <- subset(kki,kki$SRS_VERSION == 2)
-
 Two_to_One <- function(from,target) {
   y.bar = mean(target);y.sd = sd(target);
   x.bar = mean(from);x.sd = sd(from);
@@ -98,7 +95,6 @@ kki$sqrt.Standard <- sqrt(kki$Standard)
 kki <- subset(kki,!is.na(kki$SRS_TotalRawScore))
 kki <- subset(kki, !is.na(kki$mABC_TotalStandardScore))
 kki <- subset(kki,kki$mABC_AGE<14)
-kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
 multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
 singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
@@ -110,26 +106,35 @@ kki.adhd2 <- subset(kki.adhd, kki.adhd$SRS_VERSION == 2)
 ```
 
 
-## Study Details & Relevant Background Information
+## Introduction: Study Details & Relevant Background Information
 
 - Autism (ASD) and Attention Deficit/Hyperactivity Disorder (ADHD) are frequently observed in children, but are still not fully understood. 
 
-
+- Researchers at Kennedy Krieger Institute(KKI)  ran a study on children with ASD, ADHD, and typically developing children to study differences in social deficits, motor impairment, intelligence.
     - It is known that children with developmental disorders suffer from motor impairment concurrent with social deficits       associated with their respective diagnoses(1,2).  The extent and cause of this correlation merits further research.
 
-- Kennedy Krieger Institute(KKI) Study: Data Collected for Investigation and Analysis: 
+- Metrics and Scales Used to Quantify Symptom Severity in Children:
+    1. Social Responsiveness Scale Questionnaire (SRS): measures severity of social deficits in children (higher scores indicate more social deficits)
+    2. Movement Assessment Battery for Children (mABC): measures motor impairments in children.  Three subcategories for assessment include dexterity, aiming and catching, and balance summed to obtain the mABC Total Standard Score
+    3. Wechsler Intelligence Scale for Children (WISC): measures intelligence in children.  Two versions of the test quantify vocabulary, information, picture concepts, etc. 
 
-         Social Responsiveness Scale Questionnaire (SRS), Movement Assessment Battery 
-         for Children (mABC), Wechsler Intelligence Scale for Children (WISC), Gender, 
-         Age,Handedness (quantified by Edinburgh Handedness Integer), Primary and 
-         Secondary Diagnosis
+## Introduction: Areas of Particular Interest
+### Data and Analysis
 
 - We want to investigate the overall association between social deficits and motor skills for each diagnosis group.
 
-    - Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.
-  
-    - Secondary Endpoint: What factors influence this association?
 
+    <large>> Primary Endpoint: What motor skills are associated with SRS scores for each diagnosis group.</large>
+  
+    <large>> Secondary Endpoint: What factors influence this association?</large>
+    
+- Data Collected for Investigation and Analysis:
+    - Demographic (Gender, Age)
+    - Handedness (quantified by Edinburgh Handedness Integer)
+    - Primary and Secondary Diagnosis
+    - SRS Total
+    - mABC Total and Subscores
+    - WISC Score
 
 ## Methods: Cleaning Data
 
@@ -148,11 +153,10 @@ kki.td.male <- subset(kki.td, kki.td$Gender == 'M')
 kki.td.female <- subset(kki.td,kki.td$Gender == 'F')
 maleCount <- c(nrow(kki.asd.male),nrow(kki.adhd.male),nrow(kki.td.male))
 femaleCount <- c(nrow(kki.asd.female),nrow(kki.adhd.female),nrow(kki.td.female))
-rightCount <- c(length(which(kki.asd$Hand == "Right")),length(which(kki.adhd$Hand == "Right")),length(which(kki.td$Hand == "Right")))
-leftCount <- c(length(which((kki.asd$Hand == "Left"))),length(which(kki.adhd$Hand == "Left")),length(which(kki.td$Hand == "Left")))
-mixedCount <- c(length(which((kki.asd$Hand == "Mixed"))),length(which((kki.adhd$Hand == "Mixed"))),length(which((kki.td$Hand == "Mixed"))))
-table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,leftCount,mixedCount,rightCount)
-FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","Left","Mixed","Right"))
+rightCount <- c(124,285,307)
+leftCount <- c(20,36,42)
+table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,rightCount,leftCount)
+FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","RightHanded","LeftHanded"))
 agehist <-ggplot(data = na.omit(kki),aes(group = PrimaryDiagnosis, y = mABC_AGE, colour = PrimaryDiagnosis)) + geom_boxplot()+ coord_flip()+ylab("Age (Years)")+theme_classic() 
 ```
 
@@ -210,7 +214,6 @@ the subcomponents of the mABC, and differ for children with different primary di
 ```{r, include=FALSE}
 gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="none")
 gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Motor Skills")+ theme(legend.position="none")
-
 ```
 
 
@@ -235,7 +238,6 @@ ggarrange(gaisrs1, gaisrs2, hand1, hand2, nrow=1,common.legend = TRUE, legend="b
   > There seems to be a negative correlation between intelligence and motor skills, but no correlation between intelligence and social deficit.
   
   > Something is going on with Mixed-handedness(?) <- Nick, approve this
-
 ## Proposed Models
 
 $$
@@ -335,24 +337,36 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
-7.24 \\
--0.0408 \\
--0.0646  \\
-0.3292  \\
-0.0085   \\
--1.266 \\
--0.175 \\
--0.049 
+64.0176 \\
+-2.3512 \\
+1.3089  \\
+8.3848  \\
+0.0620   \\
+-13.9720 \\
+-9.3211 \\
+ -1.1236 
 \end{bmatrix}
 $$
 
-```{r}
+```{r,echo = FALSE}
 ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
 ```
 
+```{r, include=FALSE}
+males <- which(kki.adhd1$Gender == "M")
+ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Males)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
+```
 
+```{r, include=FALSE}
+females <- which(kki.adhd1$Gender == "F")
+ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
+  geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Females)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
+```
 
 
 ```{r}
@@ -360,20 +374,14 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
   ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
-```{r}
-CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
-CI_LB_adhd <- CI_adhd[1]
-CI_UB_adhd <- CI_adhd[2]
-```
+
 
 ```{r,include= FALSE}
-studentize <- function(model) {
-  n = length(fitted(model))
-  p = length(model$coefficients)
-  s = (1/(n-p-1)) * sum(residuals(model)^2)
+standardize <- function(model) {
+  s = (1/85) * sum(residuals(model)^2)
   residuals(model)/ (s * (sqrt(1-influence(model)$hat)))
 }
-student.lmadhd <- studentize(lm.adhd)
+student.lmadhd <- standardize(lm.adhd)
 leverage.lmadhd <- influence(lm.adhd)$hat
 ```
 
@@ -397,8 +405,8 @@ $$
 
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
-lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
-summary(lm.aut)
+lm.aut <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
 ```
 
 $$
@@ -408,7 +416,7 @@ $$
             \text{Aiming And Catching Score} \\
             \text{EdinburgHandedness_Integer} \\
             \text{GAI} \\
-            \text{ADHD Subtype Inattentive} \\
+            \text{Secondary Diagnosis Yes} \\
             \text{Gender Male} \\
             \text{mABC_AGE} 
 \end{bmatrix}
@@ -428,7 +436,7 @@ $$
 
 ```{r}
 ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point() + geom_hline( yintercept = 0) +
-  ggtitle("Residual Plot for Autism Model") + xlab("Fitted Values") + ylab("Residual Values")
+  ggtitle("Residual Plot for Autism Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
 ```{r}
@@ -436,8 +444,3 @@ qqnorm(lm.aut$residuals)
 qqline(lm.aut$residuals, col = 'red')
 ```
 
-```{r}
-student.lmaut <- studentize(lm.aut)
-leverage.lmaut <- influence(lm.aut)$hat
-ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
-```

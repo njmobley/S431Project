@@ -76,6 +76,7 @@ kki <- merge(kki.demo,kki.social)
 kki <- merge(kki,kki.movement)
 kki <- merge(kki,wisc.combo)
 kki <- merge(kki,kki.hand)
+kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 ## Making standard Scores
 kki.V1 <- subset(kki,kki$SRS_VERSION == 1)
 kki.V2 <- subset(kki,kki$SRS_VERSION == 2)
@@ -97,6 +98,7 @@ kki$sqrt.Standard <- sqrt(kki$Standard)
 kki <- subset(kki,!is.na(kki$SRS_TotalRawScore))
 kki <- subset(kki, !is.na(kki$mABC_TotalStandardScore))
 kki <- subset(kki,kki$mABC_AGE<14)
+kki$Hand <- cut(kki$EdinburghHandedness_Integer,c(-1.01,-.5,.5,1.01),labels = c("Left","Mixed","Right"))
 kki2 <- filter(kki,PrimaryDiagnosis != "None",SecondaryDiagnosis ==c("Yes", "No"))
 multdia <- filter(kki, PrimaryDiagnosis != "None", SecondaryDiagnosis =="Yes")
 singdia <- filter(kki, PrimaryDiagnosis != "None" , SecondaryDiagnosis == "No")
@@ -146,11 +148,20 @@ kki.td.male <- subset(kki.td, kki.td$Gender == 'M')
 kki.td.female <- subset(kki.td,kki.td$Gender == 'F')
 maleCount <- c(nrow(kki.asd.male),nrow(kki.adhd.male),nrow(kki.td.male))
 femaleCount <- c(nrow(kki.asd.female),nrow(kki.adhd.female),nrow(kki.td.female))
+<<<<<<< HEAD
 rightCount <- c(124,285,307)
 leftCount <- c(20,36,42)
 table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,rightCount,leftCount)
 FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","RightHanded","LeftHanded"))
 agehist <-ggplot(data = na.omit(kki),aes(group = PrimaryDiagnosis, y = mABC_AGE, colour = PrimaryDiagnosis)) + geom_histogram()+ylab("Age (Years)")+theme_classic() 
+=======
+rightCount <- c(length(which(kki.asd$Hand == "Right")),length(which(kki.adhd$Hand == "Right")),length(which(kki.td$Hand == "Right")))
+leftCount <- c(length(which((kki.asd$Hand == "Left"))),length(which(kki.adhd$Hand == "Left")),length(which(kki.td$Hand == "Left")))
+mixedCount <- c(length(which((kki.asd$Hand == "Mixed"))),length(which((kki.adhd$Hand == "Mixed"))),length(which((kki.td$Hand == "Mixed"))))
+table1 <- cbind(diagnosis,counts,round(age,4),maleCount,femaleCount,leftCount,mixedCount,rightCount)
+FinalTable <- kable(table1,col.names = c("Primary","Count","Avg Age","Males","Females","Left","Mixed","Right"))
+agehist <-ggplot(data = na.omit(kki),aes(group = PrimaryDiagnosis, y = mABC_AGE, colour = PrimaryDiagnosis)) + geom_boxplot()+ coord_flip()+ylab("Age (Years)")+theme_classic() 
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 ```
 
 - Removed Subjects that were under 14, since 94% subjects diagnosed with Autism or ADHD were under 14. Reduced total observations from 832 to 755
@@ -205,9 +216,14 @@ the subcomponents of the mABC, and differ for children with different primary di
 ## Methods: Other Variables
 
 ```{r, include=FALSE}
+<<<<<<< HEAD
 gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI & Social Deficits")+ theme(legend.position="none")
 gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI & Motor Skills")+ theme(legend.position="none")
 
+=======
+gaisrs1 <-ggplot(data = kki, aes(x = GAI, y = Standard,colour = PrimaryDiagnosis)) + geom_point() + geom_smooth() + ylab("SRS Total Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Social Deficits")+ theme(legend.position="none")
+gaisrs2 <-ggplot(data = kki, aes(x = GAI, y = mABC_TotalStandardScore,colour = PrimaryDiagnosis)) + geom_point() + geom_jitter() + geom_smooth() + ylab("Total Motor Score")+xlab("GAI Test Score")+ggtitle("GAI Score and Motor Skills")+ theme(legend.position="none")
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 ```
 
 
@@ -332,9 +348,30 @@ $$
 \end{bmatrix}
 =
 \begin{bmatrix}
+<<<<<<< HEAD
 7.24 \\
+=======
+7.2115 \\
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 -0.0408 \\
 -0.0646  \\
+0.3292  \\
+0.0085   \\
+-1.266 \\
+-0.175 \\
+-0.049 
+<<<<<<< HEAD
+\end{bmatrix}
+$$
+
+```{r,include = FALSE,echo = FALSE}
+=======
+\end{bmatrix}
+=
+\begin{bmatrix}
+6.11 - 8.24 \\
+-0.08 - (-0.0042)  \\
+-0.1033 - (-.0433) \\
 0.3292  \\
 0.0085   \\
 -1.266 \\
@@ -343,12 +380,14 @@ $$
 \end{bmatrix}
 $$
 
-```{r,include = FALSE,echo = FALSE}
+```{r}
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 ggplot(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd), colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd,aes(x = mABC_Balance.Component.StandardScore, y = mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score") + ylab("Fitted Values") + xlab("mABC Balance Score") + facet_wrap(~Gender)
 ```
 
+<<<<<<< HEAD
 ```{r}
 males <- which(kki.adhd1$Gender == "M")
 ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = fitted(lm.adhd)[males], colour = ADHD_Subtype)) + geom_point() + geom_jitter() +
@@ -362,6 +401,9 @@ ggplot(data = kki.adhd[males,],aes(x = mABC_Balance.Component.StandardScore,y = 
   geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 64.0176),colour = 'red',size = 1.5) + 
   geom_line(data = kki.adhd1[males,],aes(x = mABC_Balance.Component.StandardScore, mABC_Balance.Component.StandardScore *-2.38729 + 50.0456),colour = 'blue',size = 1.5) +     ggtitle("Effect of Balance Component on Total SRS Score(Females)") + ylab("Fitted Values") + xlab("mABC Balance Score") 
 ```
+=======
+
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 
 
 ```{r}
@@ -369,7 +411,11 @@ ggplot(data = NULL,aes(x = fitted(lm.adhd), y = residuals(lm.adhd))) + geom_poin
   ggtitle("Residual Plot for ADHD Model(1)") + xlab("Fitted Values") + ylab("Residual Values")
 ```
 
-
+```{r}
+CI_adhd <- confint(lm.adhd, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
+CI_LB_adhd <- CI_adhd[1]
+CI_UB_adhd <- CI_adhd[2]
+```
 
 ```{r,include= FALSE}
 studentize <- function(model) {
@@ -403,7 +449,10 @@ $$
 ```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
 lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+<<<<<<< HEAD
 lm.aut.basic <- lm(SRS_TotalRawScore ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore, data = aut)
+=======
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 summary(lm.aut)
 ```
 
@@ -444,9 +493,14 @@ qqline(lm.aut$residuals, col = 'red')
 
 ```{r}
 student.lmaut <- studentize(lm.aut)
+<<<<<<< HEAD
 
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
 leverage.lmaut <- influence(lm.aut)$hat
 ggplot(data = NULL, aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline(yintercept = 0)
+=======
+leverage.lmaut <- influence(lm.aut)$hat
+ggplot(data = NULL,aes(x = leverage.lmaut, y = student.lmaut)) + geom_point() + geom_hline( yintercept = 0)
+>>>>>>> f2576687999bbfec0539903f5db2793d48fbfd3b
 ```

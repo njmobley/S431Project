@@ -423,9 +423,13 @@ $$
 
 ## Results: ASD
 
-```{r,}
+```{r}
 aut <- subset(kki, kki$PrimaryDiagnosis == "Autism")
-lm.aut <- lm(sqrt.Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+lm.aut <- lm(Standard ~ mABC_AimingAndCatching.Component.StandardScore + mABC_Balance.Component.StandardScore + EdinburghHandedness_Integer + GAI + ADHD_Subtype + Gender + mABC_AGE, data = aut)
+summary(lm.aut)
+CI_aut <- confint(lm.aut, c('mABC_AimingAndCatching.Component.StandardScore', 'mABC_Balance.Component.StandardScore', 'EdinburghHandedness_Integer', 'GAI', 'ADHD_SubtypeInattentive', 'GenderM', 'mABC_AGE'))
+CI_LB_aut <- CI_aut[1]
+CI_UB_aut <- CI_aut[2]
 ```
 
 $$
@@ -453,13 +457,13 @@ $$
 =
 \begin{bmatrix}
 18.95858 - 89.5433 \\
--0.145524016 - 0.0255974  \\
--0.117046018 - 0.0327538 \\
--0.05088326 - 0.70459855  \\
--0.003114035 - 0.02013125   \\
--1.849132324 - (-0.69237235) \\
--0.654060303 - 0.31781322 \\
--0.231019073 - 0.13630759
+-1.52811116 - 2.2813354  \\
+-1.84658543 - 1.7954352 \\
+-4.30532586 - 13.1159718  \\
+-0.05164134 - 0.3512058   \\
+-40.23481750 - 62.5433065 \\
+-19.03641089 - 5.8892330 \\
+-2.07171924 - 4.5202255
 \end{bmatrix}
 $$
 
@@ -473,9 +477,6 @@ ggplot(data = NULL,aes(x = fitted(lm.aut), y = residuals(lm.aut))) + geom_point(
 qqnorm(lm.aut$residuals)
 qqline(lm.aut$residuals, col = 'red')
 ```
-
-
-
 
 ```{r, include = FALSE}
 ## There are some changes/

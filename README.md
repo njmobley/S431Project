@@ -1,2 +1,3 @@
 # S431Project
-Collaboration Stat-S431 KKI project
+Data Analysis Project on data provided from the Kennedy Kreiger Institute on the relationship between the social skills of children 
+and their motor skills
